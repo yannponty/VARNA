@@ -1,0 +1,516 @@
+<project name="JSmol" default="toJs" basedir=".">
+ 
+   <property name="site.path" value="site/swingjs" />
+
+   <target name="toJs" id="toJs">
+  			
+  	<!-- create a NON svn local directory only containing JS files
+  	
+  	<echo>Deleting the site directory.</echo>
+   	 	<delete quiet="true" dir="site" />
+    -->
+   	
+   	<!-- make core files -->
+ 
+   	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
+
+   	<!-- note: any changes in these next sections must be reflected also
+   	             in package.js -->
+
+   	<echo>Copying VARNA.html</echo>
+   	<copy file="VARNA.html" tofile="${site.path}/../VARNA.html"></copy>
+   		
+    <property name="javaCoreAppletFiles" value="
+    	fr/orsay/lri/varna/applications/FileNameExtensionFilter.js
+    	fr/orsay/lri/varna/applications/templateEditor/Couple.js
+    	fr/orsay/lri/varna/components/BaseSpecialColorEditor.js
+    	fr/orsay/lri/varna/components/BaseTableModel.js
+    	fr/orsay/lri/varna/components/ColorRenderer.js
+    	fr/orsay/lri/varna/controlers/ControleurBaseSpecialColorEditor.js
+    	fr/orsay/lri/varna/controlers/ControleurBlinkingThread.js
+    	fr/orsay/lri/varna/controlers/ControleurClicMovement.js
+    	fr/orsay/lri/varna/controlers/ControleurDraggedMolette.js
+    	fr/orsay/lri/varna/controlers/ControleurInterpolator.js
+    	fr/orsay/lri/varna/controlers/ControleurMenu.js
+    	fr/orsay/lri/varna/controlers/ControleurMolette.js
+    	fr/orsay/lri/varna/controlers/ControleurSelectionHighlight.js
+    	fr/orsay/lri/varna/controlers/ControleurVARNAPanelKeys.js
+    	fr/orsay/lri/varna/factories/RNAFactory.js
+    	fr/orsay/lri/varna/interfaces/InterfaceParameterLoader.js
+    	fr/orsay/lri/varna/interfaces/InterfaceVARNAListener.js
+    	fr/orsay/lri/varna/interfaces/InterfaceVARNAObservable.js
+    	fr/orsay/lri/varna/models/BaseList.js
+    	fr/orsay/lri/varna/models/export/SwingGraphics.js
+    	fr/orsay/lri/varna/models/export/VueVARNAGraphics.js
+    	fr/orsay/lri/varna/models/rna/ModelBaseStyle.js
+    	fr/orsay/lri/varna/models/rna/ModeleBackbone.js
+    	fr/orsay/lri/varna/models/rna/ModeleBackboneElement.js
+    	fr/orsay/lri/varna/models/rna/ModeleBase.js
+    	fr/orsay/lri/varna/models/rna/ModeleBaseNucleotide.js
+    	fr/orsay/lri/varna/models/rna/ModeleBP.js
+    	fr/orsay/lri/varna/models/rna/ModeleBPStyle.js
+    	fr/orsay/lri/varna/models/rna/ModeleColorMap.js
+    	fr/orsay/lri/varna/models/rna/RNA.js
+    	fr/orsay/lri/varna/models/rna/StructureTemp.js
+    	fr/orsay/lri/varna/models/rna/VARNAPoint.js
+    	fr/orsay/lri/varna/models/VARNAConfig.js
+    	fr/orsay/lri/varna/models/VARNAConfigLoader.js
+    	fr/orsay/lri/varna/models/VARNAEdits.js
+    	fr/orsay/lri/varna/utils/RNAMLParser.js
+    	fr/orsay/lri/varna/VARNA.js
+    	fr/orsay/lri/varna/VARNAPanel.js
+    	fr/orsay/lri/varna/views/VueBases.js
+    	fr/orsay/lri/varna/views/VueMenu.js
+    	fr/orsay/lri/varna/views/VueUI.js
+
+    	java/applet/Applet.js
+    	java/applet/AppletContext.js
+    	java/applet/AppletStub.js
+    	java/awt/ActiveEvent.js
+    	java/awt/Adjustable.js
+    	java/awt/AWTEvent.js
+    	java/awt/AWTEventMulticaster.js
+    	java/awt/AWTKeyStroke.js
+    	java/awt/BasicStroke.js
+    	java/awt/BorderLayout.js
+    	java/awt/Color.js
+    	java/awt/Component.js
+    	java/awt/ComponentOrientation.js
+    	java/awt/Container.js
+    	java/awt/Cursor.js
+    	java/awt/datatransfer/FlavorMap.js
+    	java/awt/datatransfer/FlavorTable.js
+    	java/awt/datatransfer/SystemFlavorMap.js
+    	java/awt/Dialog.js
+    	java/awt/Dimension.js
+    	java/awt/dnd/DropTarget.js
+    	java/awt/dnd/DropTargetContext.js
+    	java/awt/dnd/DropTargetListener.js
+    	java/awt/event/ActionEvent.js
+    	java/awt/event/ActionListener.js
+    	java/awt/event/AdjustmentListener.js
+    	java/awt/event/AWTEventListener.js
+    	java/awt/event/ComponentAdapter.js
+    	java/awt/event/ComponentEvent.js
+    	java/awt/event/ComponentListener.js
+    	java/awt/event/ContainerListener.js
+    	java/awt/event/FocusListener.js
+    	java/awt/event/HierarchyBoundsListener.js
+    	java/awt/event/HierarchyListener.js
+    	java/awt/event/InputEvent.js
+    	java/awt/event/InputMethodListener.js
+    	java/awt/event/InvocationEvent.js
+    	java/awt/event/ItemEvent.js
+    	java/awt/event/ItemListener.js
+    	java/awt/event/KeyEvent.js
+    	java/awt/event/KeyListener.js
+    	java/awt/event/MouseAdapter.js
+    	java/awt/event/MouseEvent.js
+    	java/awt/event/MouseListener.js
+    	java/awt/event/MouseMotionListener.js
+    	java/awt/event/MouseWheelListener.js
+    	java/awt/event/TextListener.js
+    	java/awt/event/WindowAdapter.js
+    	java/awt/event/WindowEvent.js
+    	java/awt/event/WindowFocusListener.js
+    	java/awt/event/WindowListener.js
+    	java/awt/event/WindowStateListener.js
+    	java/awt/EventDispatchThread.js
+    	java/awt/EventFilter.js
+    	java/awt/EventQueue.js
+    	java/awt/EventQueueItem.js
+    	java/awt/FlowLayout.js
+    	java/awt/Font.js
+    	java/awt/font/FontRenderContext.js
+    	java/awt/FontMetrics.js
+    	java/awt/Frame.js
+    	java/awt/geom/AffineTransform.js
+    	java/awt/geom/Dimension2D.js
+    	java/awt/geom/Ellipse2D.js
+    	java/awt/geom/EllipseIterator.js
+    	java/awt/geom/PathIterator.js
+    	java/awt/geom/Point2D.js
+    	java/awt/geom/Rectangle2D.js
+    	java/awt/geom/RectangularShape.js
+    	java/awt/GraphicsCallback.js
+    	java/awt/GraphicsConfiguration.js
+    	java/awt/GraphicsDevice.js
+    	java/awt/GraphicsEnvironment.js
+    	java/awt/GridBagConstraints.js
+    	java/awt/GridBagLayout.js
+    	java/awt/GridBagLayoutInfo.js
+    	java/awt/GridLayout.js
+    	java/awt/image/ImageObserver.js
+    	java/awt/Insets.js
+    	java/awt/ItemSelectable.js
+    	java/awt/JSComponent.js
+    	java/awt/LayoutManager.js
+    	java/awt/LayoutManager2.js
+    	java/awt/LightweightDispatcher.js
+    	java/awt/Paint.js
+    	java/awt/Panel.js
+    	java/awt/peer/ComponentPeer.js
+    	java/awt/peer/ContainerPeer.js
+    	java/awt/peer/DialogPeer.js
+    	java/awt/peer/FramePeer.js
+    	java/awt/peer/LightweightPeer.js
+    	java/awt/peer/WindowPeer.js
+    	java/awt/Point.js
+    	java/awt/Queue.js
+    	java/awt/Rectangle.js
+    	java/awt/RenderingHints.js
+    	java/awt/Shape.js
+    	java/awt/Stroke.js
+    	java/awt/Toolkit.js
+    	java/awt/Transparency.js
+    	java/awt/VKCollection.js
+    	java/awt/Window.js
+    	java/beans/ChangeListenerMap.js
+    	java/beans/PropertyChangeEvent.js
+    	java/beans/PropertyChangeListener.js
+    	java/beans/PropertyChangeSupport.js
+    	java/lang/AbstractStringBuilder.js
+    	java/lang/Class.js
+    	java/lang/Enum.js
+    	java/lang/StringBuffer.js
+    	java/lang/StringBuilder.js
+    	java/lang/Thread.js
+    	java/lang/ThreadGroup.js
+    	java/math/RoundingMode.js
+    	java/net/URL.js
+    	java/net/URLStreamHandlerFactory.js
+    	java/security/AccessControlContext.js
+    	java/security/AccessController.js
+    	java/security/PrivilegedAction.js
+    	java/text/AttributedCharacterIterator.js
+    	java/text/CharacterIterator.js
+    	java/text/DecimalFormat.js
+    	java/text/DecimalFormatSymbols.js
+    	java/text/DigitList.js
+    	java/text/FieldPosition.js
+    	java/text/Format.js
+    	java/text/NumberFormat.js
+    	java/util/AbstractCollection.js
+    	java/util/AbstractList.js
+    	java/util/AbstractMap.js
+    	java/util/AbstractSequentialList.js
+    	java/util/AbstractSet.js
+    	java/util/ArrayList.js
+    	java/util/Arrays.js
+    	java/util/BitSet.js
+    	java/util/Collections.js
+    	java/util/concurrent/atomic/AtomicBoolean.js
+    	java/util/Dictionary.js
+    	java/util/EventListener.js
+    	java/util/EventObject.js
+    	java/util/HashMap.js
+    	java/util/HashSet.js
+    	java/util/Hashtable.js
+    	java/util/IdentityHashMap.js
+    	java/util/LinkedList.js
+    	java/util/ListResourceBundle.js
+    	java/util/Locale.js
+    	java/util/MapEntry.js
+    	java/util/ResourceBundle.js
+    	java/util/Stack.js
+    	java/util/StringTokenizer.js
+    	java/util/Vector.js
+    	javajs/api/JSFunction.js
+    	javajs/api/JSONEncodable.js
+    	javajs/util/AjaxURLStreamHandlerFactory.js
+    	javajs/util/AU.js
+    	javajs/util/BS.js
+    	javajs/util/JSThread.js
+    	javajs/util/Lst.js
+    	javajs/util/PT.js
+    	javajs/util/SB.js
+    	javax/swing/AbstractAction.js
+    	javax/swing/AbstractButton.js
+    	javax/swing/AbstractCellEditor.js
+    	javax/swing/AbstractListModel.js
+    	javax/swing/AbstractSpinnerModel.js
+    	javax/swing/Action.js
+    	javax/swing/ActionMap.js
+    	javax/swing/AncestorNotifier.js
+    	javax/swing/ArrayTable.js
+    	javax/swing/Autoscroller.js
+    	javax/swing/border/AbstractBorder.js
+    	javax/swing/border/BevelBorder.js
+    	javax/swing/border/Border.js
+    	javax/swing/border/CompoundBorder.js
+    	javax/swing/border/EmptyBorder.js
+    	javax/swing/border/EtchedBorder.js
+    	javax/swing/border/LineBorder.js
+    	javax/swing/border/MatteBorder.js
+    	javax/swing/border/TitledBorder.js
+    	javax/swing/BorderFactory.js
+    	javax/swing/BoundedRangeModel.js
+    	javax/swing/BoxLayout.js
+    	javax/swing/ButtonModel.js
+    	javax/swing/CellEditor.js
+    	javax/swing/CellRendererPane.js
+    	javax/swing/ClientPropertyKey.js
+    	javax/swing/colorchooser/AbstractColorChooserPanel.js
+    	javax/swing/colorchooser/CenterLayout.js
+    	javax/swing/colorchooser/ColorChooserComponentFactory.js
+    	javax/swing/colorchooser/ColorSelectionModel.js
+    	javax/swing/colorchooser/DefaultColorSelectionModel.js
+    	javax/swing/colorchooser/DefaultPreviewPanel.js
+    	javax/swing/colorchooser/DefaultRGBChooserPanel.js
+    	javax/swing/colorchooser/DefaultSwatchChooserPanel.js
+    	javax/swing/colorchooser/MainSwatchPanel.js
+    	javax/swing/colorchooser/RecentSwatchPanel.js
+    	javax/swing/colorchooser/SmartGridLayout.js
+    	javax/swing/colorchooser/SwatchPanel.js
+    	javax/swing/ColorChooserDialog.js
+    	javax/swing/ComboBoxModel.js
+    	javax/swing/ComponentInputMap.js
+    	javax/swing/DefaultBoundedRangeModel.js
+    	javax/swing/DefaultButtonModel.js
+    	javax/swing/DefaultComboBoxModel.js
+    	javax/swing/DefaultListSelectionModel.js
+    	javax/swing/DefaultSingleSelectionModel.js
+    	javax/swing/DropMode.js
+    	javax/swing/event/AncestorEvent.js
+    	javax/swing/event/AncestorListener.js
+    	javax/swing/event/CaretEvent.js
+    	javax/swing/event/CellEditorListener.js
+    	javax/swing/event/ChangeEvent.js
+    	javax/swing/event/ChangeListener.js
+    	javax/swing/event/DocumentEvent.js
+    	javax/swing/event/DocumentListener.js
+    	javax/swing/event/EventListenerList.js
+    	javax/swing/event/ListDataEvent.js
+    	javax/swing/event/ListDataListener.js
+    	javax/swing/event/ListSelectionListener.js
+    	javax/swing/event/MouseInputListener.js
+    	javax/swing/event/PopupMenuListener.js
+    	javax/swing/event/RowSorterListener.js
+    	javax/swing/event/SwingPropertyChangeSupport.js
+    	javax/swing/event/TableColumnModelEvent.js
+    	javax/swing/event/TableColumnModelListener.js
+    	javax/swing/event/TableModelEvent.js
+    	javax/swing/event/TableModelListener.js
+    	javax/swing/event/UndoableEditListener.js
+    	javax/swing/event/UndoableEditEvent.js
+    	
+		javax/swing/filechooser/FileFilter.js
+    	javax/swing/Icon.js
+    	javax/swing/ImageIcon.js
+    	javax/swing/InputMap.js
+    	javax/swing/JApplet.js
+    	javax/swing/JButton.js
+    	javax/swing/JCheckBoxMenuItem.js
+    	javax/swing/JColorChooser.js
+    	javax/swing/JComboBox.js
+    	javax/swing/JComponent.js
+    	javax/swing/JDialog.js
+    	javax/swing/JFormattedTextField.js
+    	javax/swing/JFrame.js
+    	javax/swing/JLabel.js
+    	javax/swing/JLayeredPane.js
+    	javax/swing/JMenu.js
+    	javax/swing/JMenuItem.js
+    	javax/swing/JOptionPane.js
+    	javax/swing/JPanel.js
+    	javax/swing/JPopupMenu.js
+    	javax/swing/JRootPane.js
+    	javax/swing/JScrollBar.js
+    	javax/swing/JScrollPane.js
+    	javax/swing/JSeparator.js
+    	javax/swing/JSlider.js
+    	javax/swing/JSpinner.js
+    	javax/swing/JTable.js
+    	javax/swing/JTextField.js
+    	javax/swing/JToggleButton.js
+    	javax/swing/JViewport.js
+    	javax/swing/KeyboardManager.js
+    	javax/swing/KeyStroke.js
+    	javax/swing/ListModel.js
+    	javax/swing/ListSelectionModel.js
+    	javax/swing/LookAndFeel.js
+    	javax/swing/MenuElement.js
+    	javax/swing/MutableComboBoxModel.js
+    	javax/swing/plaf/ActionMapUIResource.js
+    	javax/swing/plaf/BorderUIResource.js
+    	javax/swing/plaf/ColorUIResource.js
+    	javax/swing/plaf/ComponentUI.js
+    	javax/swing/plaf/DimensionUIResource.js
+    	javax/swing/plaf/FontUIResource.js
+    	javax/swing/plaf/InputMapUIResource.js
+    	javax/swing/plaf/InsetsUIResource.js
+    	javax/swing/plaf/UIResource.js
+    	javax/swing/RepaintManager.js
+    	javax/swing/RootPaneContainer.js
+    	javax/swing/Scrollable.js
+    	javax/swing/ScrollPaneConstants.js
+    	javax/swing/ScrollPaneLayout.js
+    	javax/swing/SingleSelectionModel.js
+    	javax/swing/SizeRequirements.js
+    	javax/swing/SpinnerModel.js
+    	javax/swing/SpinnerNumberModel.js
+    	javax/swing/SwingConstants.js
+    	javax/swing/SwingPaintEventDispatcher.js
+    	javax/swing/SwingUtilities.js
+    	javax/swing/table/AbstractTableModel.js
+    	javax/swing/table/DefaultTableCellRenderer.js
+    	javax/swing/table/DefaultTableColumnModel.js
+    	javax/swing/table/JTableHeader.js
+    	javax/swing/table/TableCellEditor.js
+    	javax/swing/table/TableCellRenderer.js
+    	javax/swing/table/TableColumn.js
+    	javax/swing/table/TableColumnModel.js
+    	javax/swing/table/TableModel.js
+    	javax/swing/text/Caret.js
+    	javax/swing/text/DefaultEditorKit.js
+    	javax/swing/text/DefaultFormatter.js
+    	javax/swing/text/DefaultFormatterFactory.js
+    	javax/swing/text/Document.js
+    	javax/swing/text/DocumentFilter.js
+    	javax/swing/text/EditorKit.js
+    	javax/swing/text/Element.js
+    	javax/swing/text/InternationalFormatter.js
+    	javax/swing/text/JTextComponent.js
+    	javax/swing/text/NumberFormatter.js
+    	javax/swing/text/TextAction.js
+    	javax/swing/Timer.js
+    	javax/swing/UIDefaults.js
+    	javax/swing/UIManager.js
+    	javax/swing/undo/AbstractUndoableEdit.js
+    	javax/swing/undo/CompoundEdit.js
+    	javax/swing/undo/UndoableEdit.js
+    	javax/swing/undo/UndoableEditSupport.js
+    	javax/swing/undo/UndoManager.js
+    	javax/swing/ViewportLayout.js
+    	javax/swing/WindowConstants.js
+    	org/xml/sax/ContentHandler.js
+    	org/xml/sax/DTDHandler.js
+    	org/xml/sax/EntityResolver.js
+    	org/xml/sax/ErrorHandler.js
+    	org/xml/sax/helpers/DefaultHandler.js
+    	sun/awt/AppContext.js
+    	sun/awt/AWTAutoShutdown.js
+    	sun/awt/ComponentFactory.js
+    	sun/awt/MostRecentKeyValue.js
+    	sun/awt/MostRecentThreadAppContext.js
+    	sun/awt/PaintEventDispatcher.js
+    	sun/awt/PostEventQueue.js
+    	sun/awt/RequestFocusController.js
+    	sun/awt/SunGraphicsCallback.js
+    	sun/awt/SunToolkit.js
+    	sun/awt/WindowClosingListener.js
+    	sun/awt/WindowClosingSupport.js
+    	sun/font/FontDesignMetrics.js
+    	sun/security/action/GetPropertyAction.js
+    	sun/swing/DefaultLookup.js
+    	sun/swing/StringUIClientPropertyKey.js
+    	sun/swing/SwingLazyValue.js
+    	sun/swing/SwingUtilities2.js
+    	sun/swing/table/DefaultTableCellHeaderRenderer.js
+    	sun/swing/UIClientPropertyKey.js
+    	sun/text/resources/FormatData.js
+    	sun/text/resources/FormatData_en.js
+    	sun/util/resources/LocaleData.js
+    	swingjs/api/Interface.js
+    	swingjs/api/js/DOMNode.js
+    	swingjs/api/js/HTML5CanvasContext2D.js
+    	swingjs/api/js/JSInterface.js
+    	swingjs/api/JSMinimalAbstractDocument.js
+    	swingjs/jquery/JQueryUI.js
+    	swingjs/JSAbstractDocument.js
+    	swingjs/JSApp.js
+    	swingjs/JSAppletThread.js
+    	swingjs/JSAppletViewer.js
+    	swingjs/JSDocumentEvent.js
+    	swingjs/JSFontMetrics.js
+    	swingjs/JSFrameViewer.js
+    	swingjs/JSGraphics2D.js
+    	swingjs/JSGraphicsConfiguration.js
+    	swingjs/JSGraphicsEnvironment.js
+    	swingjs/JSMouse.js
+    	swingjs/JSNullComponentPeer.js
+    	swingjs/JSPlainDocument.js
+    	swingjs/JSScreenDevice.js
+    	swingjs/JSThreadGroup.js
+    	swingjs/JSToolkit.js
+    	swingjs/JSUtil.js
+    	swingjs/plaf/ButtonListener.js
+    	swingjs/plaf/CellHolder.js
+    	swingjs/plaf/CenterLayout.js
+    	swingjs/plaf/HTML5LookAndFeel.js
+    	swingjs/plaf/JComboPane.js
+    	swingjs/plaf/JSButtonUI.js
+    	swingjs/plaf/JSCaret.js
+    	swingjs/plaf/JSCheckBoxMenuItemUI.js
+    	swingjs/plaf/JSCheckBoxUI.js
+    	swingjs/plaf/JSColorChooserUI.js
+    	swingjs/plaf/JSComboBoxUI.js
+    	swingjs/plaf/JSComponentUI.js
+    	swingjs/plaf/JSDialogUI.js
+    	swingjs/plaf/JSEventHandler.js
+    	swingjs/plaf/JSFrameUI.js
+    	swingjs/plaf/JSLabelUI.js
+    	swingjs/plaf/JSLayeredPaneUI.js
+    	swingjs/plaf/JSLightweightUI.js
+    	swingjs/plaf/JSMenuItemUI.js
+    	swingjs/plaf/JSMenuUI.js
+    	swingjs/plaf/JSOptionPaneUI.js
+    	swingjs/plaf/JSPanelUI.js
+    	swingjs/plaf/JSPopupMenuSeparatorUI.js
+    	swingjs/plaf/JSPopupMenuUI.js
+    	swingjs/plaf/JSRadioButtonUI.js
+    	swingjs/plaf/JSRootPaneUI.js
+    	swingjs/plaf/JSScrollBarUI.js
+    	swingjs/plaf/JSScrollPaneUI.js
+    	swingjs/plaf/JSSeparatorUI.js
+    	swingjs/plaf/JSSliderUI.js
+    	swingjs/plaf/JSSpinnerUI.js
+    	swingjs/plaf/JSTableHeaderUI.js
+    	swingjs/plaf/JSTableUI.js
+    	swingjs/plaf/JSTextFieldUI.js
+    	swingjs/plaf/JSTextUI.js
+    	swingjs/plaf/JSViewportUI.js
+    	swingjs/plaf/JSWindowUI.js
+    	swingjs/plaf/LazyActionMap.js
+    	swingjs/plaf/Resizer.js
+    	swingjs/plaf/TextListener.js
+    	" />
+
+   	
+    <antcall target="call-core">
+        <param name="call-core.name" value="varna" />
+        <param name="call-core.list" value="
+         	${javaCoreAppletFiles}
+        	" />
+    </antcall>
+   	
+    <zip zipfile="dist/VARNA-SwingJS.zip" basedir="site" includes="**" />
+
+  </target>
+
+
+	  <target name="call-core" id="call-core">
+	   	<echo>......Creating core${call-core.name}.js</echo>
+	   	<concat destfile="${site.path}/js/core/tmp.js">
+	   		<filelist dir="${site.path}/j2s" files="${call-core.list}" />
+	   	</concat> 
+
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz." value="Clazz_"/>
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz__" value="Clazz._"/>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.js</echo> 	
+	   	<concat destfile="${site.path}/j2s/core/core${call-core.name}.js"><filelist dir="${site.path}/js" files="
+	   		core/coretop2.js
+	   		core/tmp.js
+	   		core/corebottom2.js
+	   		" />
+	   	</concat>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.z.js</echo> 	
+	   	<java jar="jars/closure_compiler.jar" fork="true" dir="${site.path}/j2s/core" failonerror="false">
+	   		<arg line="--js core${call-core.name}.js --js_output_file core${call-core.name}.z.js" />
+	    </java>
+	 	<delete quiet="true" file="${site.path}/js/core/tmp.js" />
+	  </target>
+
+		
+	
+</project>
