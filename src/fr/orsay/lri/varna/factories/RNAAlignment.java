@@ -11,6 +11,9 @@ import fr.orsay.lri.varna.exceptions.ExceptionFileFormatOrSyntax;
 import fr.orsay.lri.varna.exceptions.ExceptionUnmatchedClosingParentheses;
 import fr.orsay.lri.varna.models.rna.RNA;
 
+/**
+ * BH SwingJS -- must explicitly check for array out of bounds
+ */
 public class RNAAlignment {
    private ArrayList<String> _lst = new ArrayList<String> (); 
    private Hashtable<String, Integer> _index = new Hashtable<String, Integer> ();
@@ -50,6 +53,8 @@ public class RNAAlignment {
 	   {
 		   int n = _index.get(id);
 		   String seq = _lst.get(n);
+		   if (seq.length() != str.length)
+			   throw new ArrayIndexOutOfBoundsException(); // BH SwingJS -- must explicitly check for array out of bounds
 		   String nseq ="";
 		   String nstr ="";
 		   for(int i=0;i<seq.length();i++)

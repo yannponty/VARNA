@@ -528,13 +528,13 @@ public class VARNAGUI extends JFrame implements DropTargetListener, InterfaceVAR
 					  String path = o.toString();
 		    		  VARNAPanel vp = (VARNAPanel) c;
 					  try{
-		    		  FullBackup bck =  VARNAPanel.importSession(path);
+		    		  FullBackup bck =  VARNAPanel.importSession((File) o);  // BH SwingJS
 		    		  _rnaList.add(bck.config, bck.rna,bck.name,true);
 					  }
 					  catch (ExceptionLoadingFailed e3)
 					  {
-						  ArrayList<RNA> rnas = RNAFactory.loadSecStr(path);
-						  if (rnas.isEmpty())
+						  ArrayList<RNA> rnas = RNAFactory.loadSecStr((File) o); // BH SwingJS
+	 					  if (rnas.isEmpty())
 						  {
 							  throw new ExceptionFileFormatOrSyntax("No RNA could be parsed from that source.");
 						  }

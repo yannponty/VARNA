@@ -643,7 +643,6 @@
 package fr.orsay.lri.varna;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -662,16 +661,15 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.text.NumberFormat;
@@ -679,34 +677,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.undo.UndoManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -735,20 +721,25 @@ import fr.orsay.lri.varna.models.annotations.TextAnnotation;
 import fr.orsay.lri.varna.models.export.SwingGraphics;
 import fr.orsay.lri.varna.models.export.VueVARNAGraphics;
 import fr.orsay.lri.varna.models.rna.Mapping;
+import fr.orsay.lri.varna.models.rna.ModeleBP;
 import fr.orsay.lri.varna.models.rna.ModeleBackbone;
 import fr.orsay.lri.varna.models.rna.ModeleBackboneElement.BackboneType;
 import fr.orsay.lri.varna.models.rna.ModeleBase;
 import fr.orsay.lri.varna.models.rna.ModeleBaseNucleotide;
 import fr.orsay.lri.varna.models.rna.ModeleBasesComparison;
 import fr.orsay.lri.varna.models.rna.ModeleColorMap;
-import fr.orsay.lri.varna.models.rna.ModeleBP;
 import fr.orsay.lri.varna.models.rna.RNA;
-import fr.orsay.lri.varna.utils.RNAMLParser;
 import fr.orsay.lri.varna.utils.VARNASessionParser;
 import fr.orsay.lri.varna.views.VueMenu;
 import fr.orsay.lri.varna.views.VueUI;
 
 /**
+ * 
+ * BH j2s SwingJS Added PropertyChangeListener for returns from VueUI.  
+ * 
+ *  
+ *  
+ * 
  * The RNA 2D Panel is a lightweight component that allows for an automatic
  * basic drawing of an RNA secondary structures. The drawing algorithms do not
  * ensure a non-overlapping drawing of helices, thus it is possible to "spin the
@@ -764,10 +755,30 @@ import fr.orsay.lri.varna.views.VueUI;
  * 
  */
 
-public class VARNAPanel extends JPanel {
+public class VARNAPanel extends JPanel implements PropertyChangeListener {
+	
 	/**
-	 * 
+	 * SwingJS uses a PropertyChangeEvent to signal that a pseudo-modal dialog has been closed.
+	 *   
+	 * @param event
 	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		Object val = event.getNewValue();
+		switch (event.getPropertyName()) {
+		case "value":
+			_UI.onDialogReturn(val == null ? JOptionPane.CLOSED_OPTION : ((Integer) val).intValue());
+			return;
+		case "fileSelected":
+		case "colorSelected":
+		case "inputValue":
+			_UI.onDialogReturn(val);
+			break;
+		}
+	}
+
+ 
+	
 	private static final long serialVersionUID = 8194421570308956001L;
 
 	private RNA _RNA = new RNA();
@@ -853,7 +864,6 @@ public class VARNAPanel extends JPanel {
 	 *            The secondary structure in DBN format
 	 * @throws ExceptionNonEqualLength
 	 */
-	
 
 	public VARNAPanel(String seq, String str) throws ExceptionNonEqualLength {
 		this(seq, str, RNA.DRAW_MODE_RADIATE);
@@ -992,7 +1002,15 @@ public class VARNAPanel extends JPanel {
 		this.addFocusListener(ctrlKey);
 
 		_interpolator = new ControleurInterpolator(this);
+		/**
+		 * 
+		 * BH SwingJS do not start this thread
+		 * 
+		 * @j2sNative 
+		 */
+		{
 		_interpolator.start();
+		}
 
 	}
 
@@ -1077,7 +1095,6 @@ public class VARNAPanel extends JPanel {
 		_conf._numbersFont = _conf._numbersFont.deriveFont(size);
 	}
 
-	
 	/**
 	 * Sets the font style for displaying bases
 	 * 
@@ -2430,6 +2447,7 @@ public class VARNAPanel extends JPanel {
 
 		}
 
+		
 		if (!transparentBackground) {
 			super.setBackground(_conf._backgroundColor);
 		} else {
@@ -4037,7 +4055,6 @@ public class VARNAPanel extends JPanel {
 
 	public void setBaseOutlineColor(Color c) {
 		_RNA.setBaseOutlineColor(c);
-		
 	}
 
 	public ArrayList<TextAnnotation> getListeAnnotations() {
@@ -4123,7 +4140,7 @@ public class VARNAPanel extends JPanel {
 		toXML(path);
 	}
 
-	public FullBackup loadSession(String path) throws ExceptionLoadingFailed {
+	public FullBackup loadSession(File path) throws ExceptionLoadingFailed {
 
 		FullBackup bck = importSession(path);
 		Mapping map = Mapping.DefaultOutermostMapping(getRNA().getSize(),
@@ -4136,22 +4153,22 @@ public class VARNAPanel extends JPanel {
 
 	public static String VARNA_SESSION_EXTENSION = "varna";
 
-	public static FullBackup importSession(String path)
+	public static FullBackup importSession(Object path) // BH was String
 			throws ExceptionLoadingFailed {
 		try {
-			FileInputStream fis = new FileInputStream(path);
+			FileInputStream fis = (path instanceof File ? new FileInputStream((File) path) : new FileInputStream(path.toString()));
 			// ZipInputStream zis = new
 			// ZipInputStream(new BufferedInputStream(fis));
 			// zis.getNextEntry();
-			FullBackup h = importSession(fis, path);
+			FullBackup h = importSession(fis, path.toString());
 			// zis.close();
 			return h;
 		} catch (FileNotFoundException e) {
-			throw (new ExceptionLoadingFailed("File not found.", path));
+			throw (new ExceptionLoadingFailed("File not found.", path.toString()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			throw (new ExceptionLoadingFailed(
-					"I/O error while loading session.", path));
+					"I/O error while loading session.", path.toString()));
 		}
 	}
 
@@ -4169,7 +4186,7 @@ public class VARNAPanel extends JPanel {
 			VARNASessionParser sessionData = new VARNASessionParser();
 			sp.parse(fis, sessionData);
 			FullBackup res = new FullBackup(sessionData.getVARNAConfig(),
-					sessionData.getRNA(), "test");
+					sessionData.getRNA(), "test"); 
 			return res;
 		} catch (ParserConfigurationException e) {
 			throw new ExceptionLoadingFailed("Bad XML parser configuration",
@@ -4181,7 +4198,7 @@ public class VARNAPanel extends JPanel {
 		}
 	}
 
-	public void loadFile(String path) {
+	public void loadFile(File path) {
 		loadFile(path, false);
 	}
 
@@ -4214,9 +4231,9 @@ public class VARNAPanel extends JPanel {
 		loadRNA(path, false);
 	}
 	
-	public void loadRNA(String path, boolean interpolate) {
+	public void loadRNA(Object path, boolean interpolate) { // BH was String
 		try {
-			Collection<RNA> rnas = RNAFactory.loadSecStr(path);
+			Collection<RNA> rnas = (path instanceof File ? RNAFactory.loadSecStr(new FileReader((File) path)) : RNAFactory.loadSecStr(path.toString()));
 			if (rnas.isEmpty()) {
 				throw new ExceptionFileFormatOrSyntax(
 						"No RNA could be parsed from that source.");
@@ -4242,7 +4259,7 @@ public class VARNAPanel extends JPanel {
 		}
 	}
 
-	public void loadFile(String path, boolean interpolate) {
+	public void loadFile(File path, boolean interpolate) { // was String BH StringJS
 		try {
 			loadSession(path);
 		} catch (Exception e1) {
@@ -4501,5 +4518,6 @@ public class VARNAPanel extends JPanel {
 	public double getSpaceBetweenBases() {
 		return _conf._spaceBetweenBases;
 	}
+
 
 }

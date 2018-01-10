@@ -82,8 +82,10 @@ public class VueMenu extends JPopupMenu {
 	}
 
 	private void addTitle(String title, boolean keep) {
-		JSeparator sep = new JSeparator();
-		JLabel titleItem = new JLabel(" " + title);
+		// TOD BH SwingJS -- this should not be necessary
+		JSeparator sep = new JPopupMenu.Separator(); // BH SWingJS needs JPopupMenu.Separator
+		//JSeparator sep = new JSeparator();
+		JMenuItem titleItem = new JMenuItem(" " + title);//BH SwingJS was JLabel -- need to be able to do this.
 		// titleItem.setAlignmentX(0.5f);
 		Font previousFont = titleItem.getFont();
 		Font futureFont = previousFont.deriveFont(Font.BOLD).deriveFont(
@@ -163,7 +165,9 @@ public class VueMenu extends JPopupMenu {
 		addTitle("Display", true);
 		viewMenu();
 		displayMenu();
-		JSeparator sep = new JSeparator();
+		//JSeparator sep = new JSeparator();
+		// TODO BH SwingJS - this should not be necessary
+		JSeparator sep = new JPopupMenu.Separator(); // BH SWingJS needs JPopupMenu.Separator
 		add(sep);
 		_disabled.add(sep);
 
@@ -184,7 +188,9 @@ public class VueMenu extends JPopupMenu {
 		createMenuItem("Base", "annotationsaddBase", "", addAnnotations);
 		createMenuItem("Loop", "annotationsaddLoop", "", addAnnotations);
 		createMenuItem("Helix", "annotationsaddHelix", "", addAnnotations);
-		JSeparator sep = new JSeparator();
+		//JSeparator sep = new JSeparator();
+		JSeparator sep = new JPopupMenu.Separator(); // BH SWingJS needs JPopupMenu.Separator
+
 		addAnnotations.add(sep);
 		createMenuItem("Region", "annotationsaddRegion", "", addAnnotations);
 		createMenuItem("Chem. prob.", "annotationsaddChemProb", "", addAnnotations);
@@ -241,7 +247,8 @@ public class VueMenu extends JPopupMenu {
 		configMenuItem(_itemOptionGapsBaseColored, "dashbasecolored", "control D", subMenuGapsBases);		
 		_dashBasesColor = createMenuItem("Color", "dashBasesColor", "control shift D", subMenuGapsBases);
 		// Removable separator 
-		JSeparator sep = new JSeparator();
+		//JSeparator sep = new JSeparator();
+		JSeparator sep = new JPopupMenu.Separator(); // BH SWingJS needs JPopupMenu.Separator
 		_disabled.add(sep);
 		
 		// Style menu

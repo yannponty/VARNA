@@ -17,11 +17,15 @@
  */
 package fr.orsay.lri.varna.controlers;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Vector;
+
+import javax.swing.Timer;
 
 import fr.orsay.lri.varna.VARNAPanel;
 import fr.orsay.lri.varna.exceptions.MappingException;
@@ -30,13 +34,19 @@ import fr.orsay.lri.varna.models.rna.Mapping;
 import fr.orsay.lri.varna.models.rna.ModeleBase;
 import fr.orsay.lri.varna.models.rna.RNA;
 
-public class ControleurInterpolator extends Thread {
+public class ControleurInterpolator extends Thread implements ActionListener {
+
+	private static final int START = 0;
+	private static final int LOOP = 1;
+	private static final int END = 2;
 
 	VARNAPanel _vpn;
-	private int _numSteps = 25;
-	private long _timeDelay = 15;
+	protected int _numSteps = 25;  // BH SwingJS
+	private long _timeDelay = /** @j2sNative 2 || */15;
 	private boolean _running = false;
 	Targets _d = new Targets();
+	protected int _step;   // BH SwingJS
+	protected boolean _firstHalf;  // BH SwingJS
 
 	public ControleurInterpolator(VARNAPanel vpn) {
 		_vpn = vpn;
@@ -155,6 +165,11 @@ public class ControleurInterpolator extends Thread {
 				e.printStackTrace();
 			}
 			_running = false;
+			/**
+			 * @j2sNative
+			 * 
+			 * break;
+			 */
 		}
 		
 	}
@@ -358,23 +373,34 @@ public class ControleurInterpolator extends Thread {
 		nextTarget(_target, _conf, _mapping, false);
 	}
 	
+	Runnable _loop, _end;
+	
 	/**
 	 * The argument moveTarget specifies whether the RNA _target should
 	 * be rotated so that bases move as little as possible when switching
 	 * from the current RNA to _target using the animation.
 	 * Note that this will modify the _target object directly.
 	 */
-	public void nextTarget(RNA _target, VARNAConfig _conf, Mapping _mapping, boolean moveTarget)
+	public void nextTarget(final RNA _target, final VARNAConfig _conf, Mapping _mapping, boolean moveTarget)
 	{
+		_end = new Runnable() {
+
+			@Override
+			public void run() {
+				_vpn.showRNA(_target);
+				_vpn.repaint();
+			}
+			
+		};
+		
 		try {
-			RNA source = _vpn.getRNA();
-			RNA current = source;
+			final RNA source = _vpn.getRNA();
 			
 			if (moveTarget) moveNearOtherRNA(source, _target, _mapping);
 
 			if (source.getSize()!=0&&_target.getSize()!=0)
 			{
-			ArrayList<ModeleBase> currBases = current.get_listeBases();
+			ArrayList<ModeleBase> currBases = source.get_listeBases();
 			ArrayList<ModeleBase> destBases = _target.get_listeBases();
 			Vector<Vector<Integer>> intArrSource = new Vector<Vector<Integer>>();
 			Vector<Vector<Integer>> intArrTarget = new Vector<Vector<Integer>>();
@@ -385,9 +411,9 @@ public class ControleurInterpolator extends Thread {
 						.getTargetElems());
 
 			// Duplicating source and target coordinates
-			Point2D.Double[] initPosSource = new Point2D.Double[currBases
+			final Point2D.Double[] initPosSource = new Point2D.Double[currBases
 					.size()];
-			Point2D.Double[] finalPosTarget = new Point2D.Double[destBases
+			final Point2D.Double[] finalPosTarget = new Point2D.Double[destBases
 					.size()];
 
 			for (int i = 0; i < currBases.size(); i++) {
@@ -402,8 +428,8 @@ public class ControleurInterpolator extends Thread {
 			/**
 			 * Assigning final (Source) and initial (Target) coordinates
 			 */
-			Point2D.Double[] finalPosSource = new Point2D.Double[initPosSource.length];
-			Point2D.Double[] initPosTarget = new Point2D.Double[finalPosTarget.length];
+			final Point2D.Double[] finalPosSource = new Point2D.Double[initPosSource.length];
+			final Point2D.Double[] initPosTarget = new Point2D.Double[finalPosTarget.length];
 			// Final position of source model
 			for (int i = 0; i < finalPosSource.length; i++) {
 				if (_mapping.getPartner(i) != Mapping.UNKNOWN) {
@@ -472,49 +498,57 @@ public class ControleurInterpolator extends Thread {
 				}
 			}
 
-			boolean firstHalf = true;
-			for (int i = 0; i < _numSteps; i++) {
-				if (i == _numSteps / 2) {
-					_vpn.showRNA(_target);
-					current = _target;
-					currBases = current.get_listeBases();
-					firstHalf = false;
-					if (_conf!=null)
-					{_vpn.setConfig(_conf);}
-					
-					for (int j = 0; j < initPosSource.length; j++) {
-						source.setCoord(j, initPosSource[j]);
+			mode = START;
+			_loop = new Runnable(){
+
+				@Override
+				public void run() {
+					int i = _step;
+					RNA current = (_firstHalf ? source : _target);
+					if (i == _numSteps / 2) {
+						_vpn.showRNA(_target);
+						current = _target;
+						_firstHalf = false;
+						if (_conf!=null)
+						{_vpn.setConfig(_conf);}
+						
+						for (int j = 0; j < initPosSource.length; j++) {
+							source.setCoord(j, initPosSource[j]);
+						}
 					}
-				}
-				for (int j = 0; j < currBases.size(); j++) {
-					ModeleBase m = currBases.get(j);
-					Point2D mpc, mnc;
-					if (firstHalf) {
-						mpc = initPosSource[j];
-						mnc = finalPosSource[j];
-					} else {
-						mpc = initPosTarget[j];
-						mnc = finalPosTarget[j];
+					ArrayList<ModeleBase> currBases = current.get_listeBases();
+					for (int j = 0; j < currBases.size(); j++) {
+						ModeleBase m = currBases.get(j);
+						Point2D mpc, mnc;
+						if (_firstHalf) {
+							mpc = initPosSource[j];
+							mnc = finalPosSource[j];
+						} else {
+							mpc = initPosTarget[j];
+							mnc = finalPosTarget[j];
+						}
+						m.setCoords(new Point2D.Double(((_numSteps - 1 - i)
+								* mpc.getX() + (i) * mnc.getX())
+								/ (_numSteps - 1), ((_numSteps - 1 - i)
+								* mpc.getY() + i * mnc.getY())
+								/ (_numSteps - 1)));
 					}
-					m.setCoords(new Point2D.Double(((_numSteps - 1 - i)
-							* mpc.getX() + (i) * mnc.getX())
-							/ (_numSteps - 1), ((_numSteps - 1 - i)
-							* mpc.getY() + i * mnc.getY())
-							/ (_numSteps - 1)));
+					_vpn.repaint();
 				}
-				_vpn.repaint();
-				sleep(_timeDelay);
+				
+			};
+			actionPerformed(null);
+			} else {
+				_end.run();
 			}
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		} catch (MappingException e) {
 			e.printStackTrace();
+			_end.run();
 		}catch (Exception e) {
 			e.printStackTrace();
+			_end.run();
 		}
-		_vpn.showRNA(_target);
-		_vpn.repaint();
+		
 
 	}
 
@@ -534,25 +568,93 @@ public class ControleurInterpolator extends Thread {
 	private class Targets
 	{
 		LinkedList<TargetsHolder> _d = new LinkedList<TargetsHolder>();
+		public Targets() {
+			// BH j2s SwingJS added only to remove Eclipse warning
+		}
 		public synchronized void add(TargetsHolder d)
 		{
 			_d.addLast(d);
-			notify();
-		}
-		public synchronized TargetsHolder get()
-		{
-			while(_d.size()==0)
+			
+			@SuppressWarnings("unused")
+			Runnable interpolator = ControleurInterpolator.this;
+			/**
+			 * BH SwingJS no notify()
+			 * @j2sNative 
+			 * 
+			 * interpolator.run();
+			 * 
+			 */
 			{
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			notify();
+			}
+		}
+
+		public synchronized TargetsHolder get() {
+
+			/**
+			 * BH SwingJS no wait()
+			 * 
+			 * @j2sNative
+			 * 
+			 * 
+			 */
+			{
+				while (_d.size() == 0) {
+					try {
+						wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			TargetsHolder x = _d.getLast();
 			_d.clear();
 			return x;
 		}
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		runAnimation();
+	}
+
+	private int mode;
+
+	private void runAnimation() {
+		switch (mode) {
+		case START:
+			_firstHalf = true;
+			_step = 0;
+			mode = LOOP;
+			// Fall through
+		case LOOP:
+			if (_step < _numSteps) {
+				_loop.run();
+				++_step;
+				break;
+			}
+			mode = END;
+			// Fall through
+		case END:
+			_end.run();
+			return;
+		}
+		Timer t = new Timer((int) _timeDelay, this);
+		t.setRepeats(false);
+		t.start();
+		// try {
+		// for (int i = 0; i < _numSteps; i++) {
+		// _step = i;
+		// loop.run();
+		//
+		// sleep(_timeDelay);
+		// }
+		// end.run();
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// end.run();
+		// }
 	}
 
 }

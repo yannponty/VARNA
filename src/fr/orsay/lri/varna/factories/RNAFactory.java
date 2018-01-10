@@ -1,6 +1,7 @@
 package fr.orsay.lri.varna.factories;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,13 +31,20 @@ import fr.orsay.lri.varna.models.rna.ModeleBase;
 import fr.orsay.lri.varna.models.rna.RNA;
 import fr.orsay.lri.varna.utils.RNAMLParser;
 
+/**
+ * BH JAVA FIX: mostly here we are just removing a lot of unnecessary stack traces when doing a drag-drop of a file
+ * BH JAVA FIX: making sure the file reader is closed properly
+ *  
+ */
 public class RNAFactory
 {
 
   public enum RNAFileType
   {
     FILE_TYPE_STOCKHOLM, FILE_TYPE_TCOFFEE, FILE_TYPE_BPSEQ, FILE_TYPE_CT, FILE_TYPE_DBN, FILE_TYPE_RNAML, FILE_TYPE_UNKNOWN
-  };
+  }
+
+private static boolean isQuiet;
 
   public static ArrayList<RNA> loadSecStrRNAML(Reader r)
       throws ExceptionPermissionDenied, ExceptionLoadingFailed,
@@ -101,6 +109,7 @@ public class RNAFactory
     }
     catch (Exception ge)
     {
+    	if (!isQuiet) // BH
       ge.printStackTrace();
     }
     return result;
@@ -222,15 +231,29 @@ public class RNAFactory
       {
         current.setRNA(seqTmp, strTmp);
         current.setName(title);
-        result.add(current);
+        loadOk = true;
       }
     }
     catch (IOException e)
     {
       throw new ExceptionLoadingFailed(e.getMessage(), "");
     }
+    if (loadOk)
+    {
+      result.add(current);
+    }
     return result;
   }
+
+  public static ArrayList<RNA> loadSecStr(File f)
+	      throws ExceptionFileFormatOrSyntax
+	  {
+	    try {
+			return loadSecStr(new BufferedReader(new FileReader(f)), RNAFileType.FILE_TYPE_UNKNOWN);
+		} catch (FileNotFoundException e) {
+			throw new ExceptionFileFormatOrSyntax(f.toString());
+		}
+	  }
 
   public static ArrayList<RNA> loadSecStr(Reader r)
       throws ExceptionFileFormatOrSyntax
@@ -238,128 +261,115 @@ public class RNAFactory
     return loadSecStr(new BufferedReader(r), RNAFileType.FILE_TYPE_UNKNOWN);
   }
 
-  public static ArrayList<RNA> loadSecStr(BufferedReader r, RNAFileType fileType)
-      throws ExceptionFileFormatOrSyntax
-  {
-    switch (fileType)
-    {
-    case FILE_TYPE_DBN:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrDBN(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-      }
-    }
-      break;
-    case FILE_TYPE_CT:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrCT(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-          e.printStackTrace();
-      }
-    }
-      break;
-    case FILE_TYPE_BPSEQ:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrBPSEQ(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-          e.printStackTrace();
-      }
-    }
-      break;
-    case FILE_TYPE_TCOFFEE:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrTCoffee(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
-      }
-    }
-      break;    
-      case FILE_TYPE_STOCKHOLM:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrStockholm(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
-      }
-    }
-      break;
-    case FILE_TYPE_RNAML:
-    {
-      try
-      {
-        ArrayList<RNA> result = loadSecStrRNAML(r);
-        if (result.size() != 0)
-          return result;
-      }
-      catch (Exception e)
-      {
-      }
-    }
-      break;
+	public static ArrayList<RNA> loadSecStr(BufferedReader r, RNAFileType fileType) throws ExceptionFileFormatOrSyntax {
+		try {
+			switch (fileType) {
+			case FILE_TYPE_DBN: {
+				try {
+					ArrayList<RNA> result = loadSecStrDBN(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+				}
+			}
+				break;
+			case FILE_TYPE_CT: {
+				try {
+					ArrayList<RNA> result = loadSecStrCT(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+					if (!isQuiet) // BH
+						e.printStackTrace();
+				}
+			}
+				break;
+			case FILE_TYPE_BPSEQ: {
+				try {
+					ArrayList<RNA> result = loadSecStrBPSEQ(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+					if (!isQuiet) // BH
+						e.printStackTrace();
+				}
+			}
+				break;
+			case FILE_TYPE_TCOFFEE: {
+				try {
+					ArrayList<RNA> result = loadSecStrTCoffee(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+					if (!isQuiet) // BH
+						e.printStackTrace();
+				}
+			}
+				break;
+			case FILE_TYPE_STOCKHOLM: {
+				try {
+					ArrayList<RNA> result = loadSecStrStockholm(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+					if (!isQuiet) // BH
+						e.printStackTrace();
+				}
+			}
+				break;
+			case FILE_TYPE_RNAML: {
+				try {
+					ArrayList<RNA> result = loadSecStrRNAML(r);
+					if (result.size() != 0)
+						return result;
+				} catch (Exception e) {
+					if (!isQuiet) // BH
+						e.printStackTrace();
+				}
+			}
+				break;
 
-    case FILE_TYPE_UNKNOWN:
-    {
-      try
-      {
-        r.mark(1000000);
-        RNAFactory.RNAFileType[] types = RNAFactory.RNAFileType.values();
-        for (int i = 0; i < types.length; i++)
-        {
-          r.reset();
-          RNAFactory.RNAFileType t = types[i];
-          if (t != RNAFactory.RNAFileType.FILE_TYPE_UNKNOWN)
-          {
-            try
-            {
-              ArrayList<RNA> result = loadSecStr(r, t);
-              if (result.size() != 0)
-                return result;
-            }
-            catch (Exception e)
-            {
-              System.err.println(e.toString());
-            }
-          }
-        }
-      }
-      catch (IOException e2)
-      {
-
-      }
-    }
-    }
-    throw new ExceptionFileFormatOrSyntax("Couldn't parse this file as "
-        + fileType + ".");
-  }
+			case FILE_TYPE_UNKNOWN: {
+				try {
+					r.mark(1000000);
+					RNAFactory.RNAFileType[] types = RNAFactory.RNAFileType.values();
+					isQuiet = true; // BH to not report errors when
+									// drag-dropping
+					ArrayList<RNA> result = null;
+					RNAFactory.RNAFileType t = null;
+					for (int i = 0; i < types.length; i++) {
+						r.reset();
+						t = types[i];
+						if (t != RNAFactory.RNAFileType.FILE_TYPE_UNKNOWN) {
+							try {
+								result = loadSecStr(r, t);
+								if (result.size() != 0) {
+									break;
+								}
+							} catch (Exception e) {
+								if (!isQuiet) // BH
+									System.err.println(e.toString());
+							}
+						}
+					}
+					System.out.println(t); // BH
+					isQuiet = false; // BH
+					return result;
+				} catch (IOException e2) {
+					e2.printStackTrace();
+				}
+			}
+			}
+			throw new ExceptionFileFormatOrSyntax("Couldn't parse this file as " + fileType + ".");
+		} finally { // BH !!
+			try {
+				if (!isQuiet)
+					r.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+	}
 
   public static RNAFileType guessFileTypeFromExtension(String path)
   {
@@ -560,6 +570,7 @@ public class RNAFactory
     }
     catch (NumberFormatException e)
     {
+    	if (!isQuiet) // BH SwingJS
       e.printStackTrace();
     }
     catch (IOException e)
@@ -646,11 +657,13 @@ public class RNAFactory
     }
     catch (NumberFormatException e)
     {
+    	if (!isQuiet) // BH SwingJS
       e.printStackTrace();
     }
     catch (IOException e)
     {
-      e.printStackTrace();
+    	if (!isQuiet) // BH SwingJS
+    		e.printStackTrace();
     }
     if (!loadOk)
     {
@@ -780,6 +793,7 @@ public class RNAFactory
     }
     catch (NumberFormatException e)
     {
+    	if (!isQuiet) // BH SwingJS
     	e.printStackTrace();
       throw new ExceptionFileFormatOrSyntax(e.getMessage(), "");
     }

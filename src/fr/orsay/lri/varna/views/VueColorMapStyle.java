@@ -53,6 +53,7 @@ public class VueColorMapStyle extends JPanel implements ActionListener, ItemList
 	private JComboBox _cb; 
 	private JTextField _code; 
 	private ModeleColorMap _backup;
+	// TODO BH SwingJS note that the save dialog is never used in JavaScript 
 	private static JFileChooser fc = new JFileChooser(){
 	    public void approveSelection(){
 	        File f = getSelectedFile();
@@ -137,7 +138,7 @@ public class VueColorMapStyle extends JPanel implements ActionListener, ItemList
 			_cb.setSelectedItem(finalArray.length-1);
 		}
 		_cb.addItemListener(this);
-
+		
 		_code.setText(getTextRepresentation());
 		
 		
@@ -156,7 +157,6 @@ public class VueColorMapStyle extends JPanel implements ActionListener, ItemList
 		fc.setFileFilter(CMSFiles);
 		
 		codePanel.setLayout(new BoxLayout(codePanel,BoxLayout.LINE_AXIS));
-		
 		codePanel.add(codeCaption);
 		codePanel.add(_code);
 		JButton loadStyleButton = new JButton("Load");
