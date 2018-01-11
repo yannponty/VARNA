@@ -2,6 +2,11 @@
 Status
 ======
 
+1/10/2018
+
+fixes VueUI handling of JFileChooser and JColorChooser callbacks not using revised SelectedFile and SelectedColor property names
+implements blinking iterator when dragging to reposition RNA blob
+implements annotations 
 
 1/7/2018
 
