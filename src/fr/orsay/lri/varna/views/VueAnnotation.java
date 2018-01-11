@@ -26,7 +26,6 @@ import java.awt.geom.Point2D.Double;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -39,6 +38,9 @@ import fr.orsay.lri.varna.controlers.ControleurVueAnnotation;
 import fr.orsay.lri.varna.models.annotations.TextAnnotation;
 
 /**
+ * 
+ * BH SwingJS using asynchronous JOptionPane.showConfirmDialog
+ * 
  * annoted text view for edition
  * 
  * @author Darty@lri.fr
@@ -46,15 +48,15 @@ import fr.orsay.lri.varna.models.annotations.TextAnnotation;
  */
 public class VueAnnotation {
 
-	private VARNAPanel _vp;
+	protected VARNAPanel _vp;
 	private JSlider ySlider, xSlider;
 	private JButton colorButton;
 	private JTextArea textArea;
 	private JPanel panel;
-	private TextAnnotation textAnnotation, textAnnotationSave;
+	protected TextAnnotation textAnnotation, textAnnotationSave;
 	private VueFont vueFont;
 	private ControleurVueAnnotation _controleurVueAnnotation;
-	private boolean newAnnotation, limited;
+	protected boolean newAnnotation, limited;
 	private Double position;
 	private JSlider rotationSlider;
 
@@ -319,22 +321,44 @@ public class VueAnnotation {
 	public void show() {
 		_vp.set_selectedAnnotation(textAnnotation);
 		_vp.highlightSelectedAnnotation();
-		if (JOptionPane.showConfirmDialog(_vp, getPanel(),
-				"Add/edit annotation", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
-			update();
-		} else {
-			if (newAnnotation) {
-				_vp.set_selectedAnnotation(null);
-				if (!_vp.removeAnnotation(textAnnotation))
-					_vp.errorDialog(new Exception("Impossible de supprimer"));
-			} else {
-				textAnnotation.copy(textAnnotationSave);
+		
+		// BH SwingjS using asynchronous dialog
+		Runnable ok = new Runnable() {
+
+			@Override
+			public void run() {
+				update();
 			}
-		}
-		_vp.resetAnnotationHighlight();
-		_vp.set_selectedAnnotation(null);
-		_vp.repaint();
+			
+		};
+
+		Runnable cancel = new Runnable() {
+
+			@Override
+			public void run() {
+				if (newAnnotation) {
+					_vp.set_selectedAnnotation(null);
+					if (!_vp.removeAnnotation(textAnnotation))
+						_vp.errorDialog(new Exception("Impossible de supprimer"));
+				} else {
+					textAnnotation.copy(textAnnotationSave);
+				}
+			}
+			
+		};
+
+		Runnable final_ = new Runnable() {
+
+			@Override
+			public void run() {
+				_vp.resetAnnotationHighlight();
+				_vp.set_selectedAnnotation(null);
+				_vp.repaint();
+			}
+			
+		};
+		
+		_vp.getVARNAUI().showConfirmDialog(getPanel(), "Add/edit annotation", ok, cancel, cancel, final_);
 	}
 
 	public boolean isLimited() {

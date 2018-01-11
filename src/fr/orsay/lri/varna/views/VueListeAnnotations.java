@@ -78,7 +78,7 @@ public class VueListeAnnotations extends JPanel {
 	private JTable table;
 	private int type;
 	private AnnotationTableModel specialTableModel;
-	
+	// BH SwingJS - this is never used in JavaScript
 	private static JFileChooser fc = new JFileChooser(){
 	    public void approveSelection(){
 	        File f = getSelectedFile();

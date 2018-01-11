@@ -3,45 +3,37 @@
 
 	import java.awt.Color;
 import java.awt.Dimension;
-	import java.awt.FlowLayout;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-	import javax.swing.JLabel;
-import javax.swing.JList;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-	import javax.swing.JPanel;
-	import javax.swing.JSlider;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 
 import fr.orsay.lri.varna.VARNAPanel;
 import fr.orsay.lri.varna.models.annotations.ChemProbAnnotation;
 import fr.orsay.lri.varna.models.annotations.HighlightRegionAnnotation;
-import fr.orsay.lri.varna.models.rna.ModeleBase;
 
 
 public class VueChemProbAnnotation implements ChangeListener, ActionListener, ItemListener {
 
-		private VARNAPanel _vp;
+		protected VARNAPanel _vp;
 		private JPanel panel;
-		private ChemProbAnnotation _an;
+		protected ChemProbAnnotation _an;
 		private static int CONTROL_HEIGHT = 50;
 		private static int TITLE_WIDTH = 70;
 		private static int CONTROL_WIDTH = 200;
-		private JButton color  = new JButton();
+		protected JButton color  = new JButton();
 		JSpinner intensity;
 		JComboBox outward = new JComboBox(new String[]{"Inward","Outward"});
 		JComboBox type = new JComboBox(ChemProbAnnotation.ChemProbAnnotationType.values());
@@ -141,17 +133,25 @@ public class VueChemProbAnnotation implements ChangeListener, ActionListener, It
 			
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			if (e.getActionCommand().equals("outline"))
-			{
-			  Color c = JColorChooser.showDialog(getPanel(), "Choose new outline color", _an.getColor());
-			  if (c!= null)
-			  {   _an.setColor(c);  }
-			}
-			color.setBackground(_an.getColor());
-			_vp.repaint();
-			
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals("outline")) {
+			// BH j2s SwingJS asynchronous for JavaScript; synchronous for Java
+			_vp.getVARNAUI().showColorDialog("Choose new outline color", _an.getColor(), new Runnable() {
+
+				@Override
+				public void run() {
+					Color c = (Color) _vp.getVARNAUI().dialogReturnValue;
+					if (c != null) {
+						_an.setColor(c);
+						color.setBackground(_an.getColor());
+						_vp.repaint();
+					}
+				}
+
+			});
 		}
+
+	}
 
 		public void itemStateChanged(ItemEvent e) {
 			if (e.getSource()==outward)

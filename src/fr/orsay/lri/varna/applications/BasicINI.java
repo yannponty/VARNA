@@ -101,7 +101,8 @@ public class BasicINI {
 
 		try
 		{
-			
+			System.out.println("Loading "+new File(filename).getAbsolutePath());
+
 			Reader r = new FileReader(filename);
 			StreamTokenizer s = new StreamTokenizer(r);
 			s.resetSyntax();

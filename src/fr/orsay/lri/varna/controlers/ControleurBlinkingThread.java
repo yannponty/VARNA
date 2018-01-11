@@ -17,9 +17,18 @@
  */
 package fr.orsay.lri.varna.controlers;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Timer;
+
 import fr.orsay.lri.varna.VARNAPanel;
 
-public class ControleurBlinkingThread extends Thread {
+/**
+ * BH SwingJS converted to Timer mechanism for compatibility with JavaScript 
+ *
+ */
+public class ControleurBlinkingThread extends Thread implements ActionListener {
 	public static final long DEFAULT_FREQUENCY = 50;
 	private long _period;
 	private VARNAPanel _parent;
@@ -61,11 +70,65 @@ public class ControleurBlinkingThread extends Thread {
 		return _val;
 	}
 
+	protected final int START = 0;
+	protected final int LOOP = 1;
+	protected final int STOP = -1;
+	
+	protected int nextMode = START;
+	private Timer timer;
+	
+	
+	public void interrupt() {
+		super.interrupt();
+		stopTimer();
+		run();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		run();
+	}
 	public void run() {
-		while (true) {
+	//   same as:
+	//			while (true) {
+	//			try {
+	//				if (_active) {
+	//					sleep(_period);
+	//					if (_increasing) {
+	//						_val = Math.min(_val + _incr, _maxVal);
+	//						if (_val == _maxVal) {
+	//							_increasing = false;
+	//						}
+	//					} else {
+	//						_val = Math.max(_val - _incr, _minVal);
+	//						if (_val == _minVal) {
+	//							_increasing = true;
+	//						}
+	//					}
+	//					_parent.repaint();
+	//				} else {
+	//					sleep(10000);
+	//				}
+	//			} catch (InterruptedException e) {
+	//			}
+	//		}
+		long delay = 0;
+		while (true) { 
 			try {
-				if (_active) {
-					sleep(_period);
+				switch (nextMode) {
+				case START:
+					if (_active) {
+						delay = _period;
+						nextMode = LOOP;
+					} else {
+						delay = 10000;
+						nextMode = START;
+					}
+					startTimer(delay);
+					return;
+				case STOP:
+					break;
+				case LOOP:
 					if (_increasing) {
 						_val = Math.min(_val + _incr, _maxVal);
 						if (_val == _maxVal) {
@@ -78,11 +141,29 @@ public class ControleurBlinkingThread extends Thread {
 						}
 					}
 					_parent.repaint();
-				} else {
-					sleep(10000);
+					nextMode = START;
+					continue;
 				}
+				sleep(0);
 			} catch (InterruptedException e) {
+				// ignore??
 			}
+			break;
+			}
+	}
+
+	private void startTimer(long delay) {
+		stopTimer();
+		timer = new Timer((int) delay, this);
+		timer.setRepeats(false);
+		timer.start();
+	}
+
+	private void stopTimer() {
+		if (timer != null) {
+			timer.stop();
+			timer = null;
 		}
 	}
+
 }

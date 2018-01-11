@@ -25,6 +25,7 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -205,8 +206,8 @@ public class VARNA extends JApplet implements InterfaceParameterLoader,DropTarge
 	    			  if (c instanceof VARNAPanel)
 	    			  {
 	    				  VARNAPanel vp = (VARNAPanel) c;
-	    				  String path = o.toString();
-	    				  vp.loadFile(path,true);
+	    				  //String path = o.toString();
+	    				  vp.loadFile((File) o,true); // BH SwingJS
 	    				  vp.repaint();
 	    			  }
 	    		  }

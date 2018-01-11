@@ -509,15 +509,15 @@ public class TemplateEditor extends JFrame implements KeyListener, ActionListene
 	    			  if (c instanceof VARNAPanel)
 	    			  {
 	    				  VARNAPanel vp = (VARNAPanel) c;
-	    				  String path = o.toString();
-	    				  vp.loadFile(path,true);
+	    				  //String path = o.toString();
+	    				  vp.loadFile((File) o, true); // BH SwingJS 
 	    				  vp.repaint();
 	    			  }
 	    			  else if (c instanceof TemplatePanel)
 	    			  {
 	    				  TemplatePanel sk = (TemplatePanel) c;
-	    				  String path = o.toString();
-	    				  sk.loadFromXmlFile(new File(path));
+	    				  //String path = o.toString();
+	    				  sk.loadFromXmlFile((File) o); // BH SwingJS
 	    				  sk.repaint();
 	    			  }
 	    		  }

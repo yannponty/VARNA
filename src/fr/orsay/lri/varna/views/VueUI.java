@@ -20,25 +20,16 @@ package fr.orsay.lri.varna.views;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageFilter;
-import java.awt.image.ImageProducer;
-import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -51,16 +42,15 @@ import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.UIResource;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEditSupport;
 
 import fr.orsay.lri.varna.VARNAPanel;
 import fr.orsay.lri.varna.applications.FileNameExtensionFilter;
 import fr.orsay.lri.varna.applications.VARNAPrinter;
-import fr.orsay.lri.varna.applications.templateEditor.Couple;
-import fr.orsay.lri.varna.applications.templateEditor.TemplateEdits;
-import fr.orsay.lri.varna.applications.templateEditor.TemplatePanel;
 import fr.orsay.lri.varna.exceptions.ExceptionExportFailed;
 import fr.orsay.lri.varna.exceptions.ExceptionFileFormatOrSyntax;
 import fr.orsay.lri.varna.exceptions.ExceptionJPEGEncoding;
@@ -77,14 +67,188 @@ import fr.orsay.lri.varna.models.VARNAEdits;
 import fr.orsay.lri.varna.models.annotations.ChemProbAnnotation;
 import fr.orsay.lri.varna.models.annotations.HighlightRegionAnnotation;
 import fr.orsay.lri.varna.models.annotations.TextAnnotation;
+import fr.orsay.lri.varna.models.rna.ModeleBP;
 import fr.orsay.lri.varna.models.rna.ModeleBase;
 import fr.orsay.lri.varna.models.rna.ModeleBaseNucleotide;
 import fr.orsay.lri.varna.models.rna.ModeleBasesComparison;
-import fr.orsay.lri.varna.models.rna.ModeleBP;
 import fr.orsay.lri.varna.models.rna.RNA;
 
+
 public class VueUI {
-	private VARNAPanel _vp;
+	
+	/**
+	 *
+	 * BH SwingJS
+	 * 
+	 *      JavaScript cannot wait on a thread and so cannot wait for the result
+	 *      of a customized modal JOptionPane.
+	 * 
+	 *      Instead, we make any JPanel that is placed in the JOptionPane
+	 *      implement Runnable. In Java, we simply run that runnable here when an OK
+	 *      response is delivered; in JavaScript, we run the runnable within the
+	 *      JavaScript version of JOptionPane as an asynchronous callback.
+	 *      
+	 *      Same for a CANCEL, CLOSED, ERROR, or FINAL response.
+	 *      
+	 *      Note that for simple error or warning messages, this is not required; they will use simple HTML5 messages.
+	 * 
+	 */
+   public Runnable okBtnCallback, cancelBtnCallback, closeBtnCallback, errorCallback, finalCallback, noBtnCallback, objectCallback;
+
+   public Object dialogReturnValue;
+	
+   public Object getDialogReturnValue() {
+		return dialogReturnValue;
+	}
+
+	public Throwable dialogError;
+	
+	/**
+	 * BH SwingJS
+	 * 
+	 * 
+	 * @return
+	 */
+	public Throwable getDialogError() {
+		return dialogError;
+	}
+
+
+	/**
+	 * BH SwingJS
+	 * 
+	 * Initiate a message dialog with callback for OK and close.
+	 * 
+	 * @param messagePanel
+	 * @param title
+	 * @param ok
+	 * @param close
+	 */
+	private void showMessageDialog(Object messagePanel, String title, int messageType, Runnable ok, Runnable close) {
+		okBtnCallback = ok;
+		closeBtnCallback = close;
+		JOptionPane.showMessageDialog(_vp, messagePanel, title, messageType);
+	}
+
+
+
+
+	/**
+	 * BH SwingJS
+	 * 
+	 * Initiate a confirm dialog with callbacks.
+	 * 
+	 * @param optionPanel
+	 * @param title
+	 * @param ok
+	 * @param cancel
+	 * @param close_final_error optional close,finally,error
+	 */
+	public void showConfirmDialog(JPanel optionPanel, String title, Runnable ok, Runnable cancel, Runnable... close_final_error) {
+		okBtnCallback = ok;
+		cancelBtnCallback = cancel;
+		closeBtnCallback = (close_final_error.length > 0 ? close_final_error[0] : null);
+		finalCallback = (close_final_error.length > 1 ? close_final_error[1] : null);
+		errorCallback = (close_final_error.length > 2 ? close_final_error[2] : null);		
+		onDialogReturn(JOptionPane.showConfirmDialog(_vp, optionPanel, title, JOptionPane.OK_CANCEL_OPTION));
+	}
+
+	/**
+	 * BH SwingJS
+	 * 
+	 * Initiate an input dialog with callbacks.
+	 * 
+	 * @param message
+	 * @param initialValue
+	 * @param input
+	 * @param close_final_error optional [close,finally,error]
+	 */
+	public void showInputDialog(String message, Object initialValue, Runnable input, Runnable... close_final_error) {
+		objectCallback = input;
+		closeBtnCallback = (close_final_error.length > 0 ? close_final_error[0] : null);
+		finalCallback = (close_final_error.length > 1 ? close_final_error[1] : null);
+		errorCallback = (close_final_error.length > 2 ? close_final_error[2] : null);		
+		onDialogReturn(JOptionPane.showInputDialog(_vp, message, initialValue));
+	}
+
+	/**
+	 * BH SwingJS
+	 * 
+	 * Initiate an color chooser dialog with callbacks.
+	 * 
+	 * @param message
+	 * @param initialValue
+	 * @param input
+	 * @param close_final_error optional [close,finally,error]
+	 */
+	public void showColorDialog(String message, Object initialValue, Runnable ret) {
+		objectCallback = ret;
+		onDialogReturn(JColorChooser.showDialog(_vp, message, (Color) initialValue));
+	}
+
+	
+	/**
+	 * BH SwingJS
+	 * 
+	 * A general method to handle all the showInputDialog, JFileChooser, and JColorChooser callbacks from all the VueXXX classes.
+	 * 
+	 * The initial return to be ignored is an object that is an instanceof UIResource.
+	 * 
+	 */
+	public void onDialogReturn(Object value) {
+		dialogReturnValue = value;
+		if (objectCallback != null && !(value instanceof UIResource))
+			objectCallback.run();
+	}
+	
+	/**
+	 * BH SwingJS
+	 * 
+	 * A general method to handle all the showConfirmDialog callbacks from all
+	 * the VueXXX classes.
+	 * 
+	 * The initial return to be ignored is NaN, testable as 
+	 * value != Math.floor(value).
+	 * 
+	 */
+	public void onDialogReturn(int value) {
+		try {
+			switch (value) {
+			case JOptionPane.OK_OPTION | JOptionPane.YES_OPTION:
+				if (okBtnCallback != null)
+					okBtnCallback.run();
+				break;
+			case JOptionPane.NO_OPTION:
+				if (noBtnCallback != null)
+					noBtnCallback.run();
+				break;
+			case JOptionPane.CANCEL_OPTION:
+				if (cancelBtnCallback != null)
+					cancelBtnCallback.run();
+				break;
+			case JOptionPane.CLOSED_OPTION:
+				if (closeBtnCallback != null)
+					closeBtnCallback.run();
+				break;
+			}
+		} catch (Throwable e) {
+			dialogError = e;
+			if (errorCallback != null)
+				errorCallback.run();
+		} finally {
+			if (value != Math.floor(value)) {
+				// asynchronous deferred
+				return;
+			}
+			if (finalCallback != null)
+				finalCallback.run();
+			okBtnCallback = noBtnCallback = cancelBtnCallback = closeBtnCallback = errorCallback = objectCallback = null;
+			dialogError = null;
+		}
+	}
+	
+	
+    protected VARNAPanel _vp;
 	private File _fileChooserDirectory = null;
 	private UndoableEditSupport _undoableEditSupport;
 
@@ -229,20 +393,24 @@ public class VueUI {
 
 	public void UIChooseRNAs(ArrayList<RNA> rnas) {
 		if (rnas.size() > 5) {
-			VueRNAList vl = new VueRNAList(rnas);
-			if (JOptionPane.showConfirmDialog(_vp, vl,
-					"Select imported sequence/structures",
-					JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-				for (RNA r : vl.getSelectedRNAs()) {
-					try {
-						r.drawRNA(_vp.getConfig());
-					} catch (ExceptionNAViewAlgorithm e) {
-						e.printStackTrace();
+			final VueRNAList vrna = new VueRNAList(rnas);
+			Runnable ok = new Runnable() {
+
+				@Override
+				public void run() {
+					for (RNA r : vrna.getSelectedRNAs()) {
+						try {
+							r.drawRNA(_vp.getConfig());
+						} catch (ExceptionNAViewAlgorithm e) {
+							e.printStackTrace();
+						}
+						_vp.showRNA(r);
 					}
-					_vp.showRNA(r);
+					_vp.repaint();
 				}
-				_vp.repaint();
-			}
+
+			};
+			showConfirmDialog(vrna, "Select imported sequence/structures", ok, null);
 		} else {
 			for (RNA r : rnas) {
 				try {
@@ -269,13 +437,12 @@ public class VueUI {
 					if (!path.toLowerCase().endsWith(".varna")) {
 						ArrayList<RNA> rnas = RNAFactory.loadSecStr(path);
 						if (rnas.isEmpty()) {
-							throw new ExceptionFileFormatOrSyntax(
-									"No RNA could be parsed from that source.");
+							throw new ExceptionFileFormatOrSyntax("No RNA could be parsed from that source.");
 						} else {
 							UIChooseRNAs(rnas);
 						}
 					} else {
-						FullBackup bck = _vp.loadSession(path);
+						FullBackup bck = _vp.loadSession(fc.getSelectedFile()); // was path
 					}
 				} catch (ExceptionExportFailed e1) {
 					_vp.errorDialog(e1);
@@ -295,118 +462,173 @@ public class VueUI {
 	}
 
 	public void UISetColorMapStyle() {
-		VueColorMapStyle cms = new VueColorMapStyle(_vp);
-		if (JOptionPane.showConfirmDialog(_vp, cms, "Choose color map style",
-				JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-			_vp.setColorMap(cms.getColorMap());
-		} else {
-			cms.cancelChanges();
-		}
+		final VueColorMapStyle vcms = new VueColorMapStyle(_vp);
+		Runnable ok = new Runnable() {
+
+			@Override
+			public void run() {
+				_vp.setColorMap(vcms.getColorMap());
+			}
+			
+		};
+		Runnable cancel = new Runnable() {
+
+			@Override
+			public void run() {
+				vcms.cancelChanges();
+			}
+						
+		};
+		showConfirmDialog(vcms, "Choose color map style", ok, cancel, cancel, null, null);
 	}
 
 	public void UILoadColorMapValues() {
-		VueLoadColorMapValues cms = new VueLoadColorMapValues(_vp);
-		if (JOptionPane.showConfirmDialog(_vp, cms, "Load base values",
-				JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-			try {
+		final VueLoadColorMapValues vcmv = new VueLoadColorMapValues(_vp);
+		Runnable ok = new Runnable(){
+			
+			@Override
+			public void run() {
 				_vp.setColorMapVisible(true);
-				_vp.readValues(cms.getReader());
-			} catch (IOException e) {
-				_vp.errorDialog(e);
+				try {
+					_vp.readValues(vcmv.getReader());
+				} catch (IOException e) {
+					_vp.errorDialog((Exception) getDialogError());
+				}
 			}
-
-		}
+			
+		};
+		showConfirmDialog(vcmv, "Load base values", ok, null);
 	}
 
 	public void UISetColorMapValues() {
-		VueBaseValues cms = new VueBaseValues(_vp);
-		if (JOptionPane.showConfirmDialog(_vp, cms, "Choose base values",
-				JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-		} else {
-			cms.cancelChanges();
-		}
+		final VueBaseValues vbv = new VueBaseValues(_vp);
+		Runnable cancel = new Runnable() {
+
+			@Override
+			public void run() {
+				vbv.cancelChanges();
+			}
+						
+		};
+		showConfirmDialog(vbv, "Choose base values", null, cancel);
 	}
 
 	public void UIManualInput() throws ParseException, ExceptionNonEqualLength {
 		if (_vp.isModifiable()) {
-			VueManualInput manualInput = new VueManualInput(_vp);
-			if (JOptionPane.showConfirmDialog(_vp, manualInput.getPanel(),
-					"Input sequence/structure", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-				if (_vp.getRNA().getSize() == 0) {
+			final VueManualInput manualInput = new VueManualInput(_vp);
+			Runnable ok = new Runnable() {
 
+				@Override
+				public void run() {
+					if (_vp.getRNA().getSize() == 0) {
+
+					}
+					try {
+						RNA r = new RNA();
+						VARNAConfig cfg = new VARNAConfig();
+						r.setRNA(manualInput.getTseq().getText(), manualInput.getTstr().getText());
+						r.drawRNA(_vp.getRNA().get_drawMode(), cfg);
+						_vp.drawRNAInterpolated(r);
+						_vp.repaint();
+					} catch (ExceptionFileFormatOrSyntax e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExceptionNAViewAlgorithm e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExceptionUnmatchedClosingParentheses e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				try {
-					RNA r = new RNA();
-					VARNAConfig cfg = new VARNAConfig();
-					r.setRNA(manualInput.getTseq().getText(), manualInput
-							.getTstr().getText());
-					r.drawRNA(_vp.getRNA().get_drawMode(), cfg);
-					_vp.drawRNAInterpolated(r);
-					_vp.repaint();
-				} catch (ExceptionFileFormatOrSyntax e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExceptionNAViewAlgorithm e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+				
+			};
+			showConfirmDialog(manualInput.getPanel(), "Input sequence/structure", ok, null);
 		}
 	}
 
 	public void UISetTitle() {
 		if (_vp.isModifiable()) {
-			String res = JOptionPane.showInputDialog(_vp, "Input title",
-					_vp.getTitle());
-			if (res != null) {
+			Runnable input = new Runnable() {
+
+				@Override
+				public void run() {
+					String res = (String) getDialogReturnValue();
+					if (res != null) {
 				_vp.setTitle(res);
-				_vp.repaint();
-			}
+						_vp.repaint();
+					}
+				}
+				
+			};
+			
+			showInputDialog("Input title", _vp.getTitle(), input);
 		}
 	}
 
 	public void UISetColorMapCaption() {
 		if (_vp.isModifiable()) {
-			String res = JOptionPane.showInputDialog(_vp,
-					"Input new color map caption", _vp.getColorMapCaption());
-			if (res != null) {
-				_vp.setColorMapCaption(res);
-				_vp.repaint();
-			}
+			Runnable input = new Runnable() {
+
+				@Override
+				public void run() {
+					String res = (String) getDialogReturnValue();						
+					if (res != null) {
+						_vp.setColorMapCaption(res);
+						_vp.repaint();
+					}
+				}
+				
+			};
+			showInputDialog("Input new color map caption", _vp.getColorMapCaption(), input);
 		}
 	}
 
 	public void UISetBaseCharacter() {
 		if (_vp.isModifiable()) {
-			int i = _vp.getNearestBase();
+			final int i = _vp.getNearestBase();
 
 			if (_vp.isComparisonMode()) {
-				String res = JOptionPane.showInputDialog(_vp, "Input base",
-						((ModeleBasesComparison) _vp.getRNA().get_listeBases()
-								.get(i)).getBases());
-				if (res != null) {
-					ModeleBasesComparison mb = (ModeleBasesComparison) _vp
-							.getRNA().get_listeBases().get(i);
-					String bck = mb.getBase1() + "|" + mb.getBase2();
-					mb.setBase1(((res.length() > 0) ? res.charAt(0) : ' '));
-					mb.setBase2(((res.length() > 1) ? res.charAt(1) : ' '));
-					_vp.repaint();
-					_vp.fireSequenceChanged(i, bck, res);
-				}
+
+				Runnable input = new Runnable() {
+
+					@Override
+					public void run() {
+						String res = (String) getDialogReturnValue();
+						if (res != null) {
+							ModeleBasesComparison mb = (ModeleBasesComparison) _vp.getRNA().get_listeBases().get(i);
+							String bck = mb.getBase1() + "|" + mb.getBase2();
+							mb.setBase1(((res.length() > 0) ? res.charAt(0) : ' '));
+							mb.setBase2(((res.length() > 1) ? res.charAt(1) : ' '));
+							_vp.repaint();
+							_vp.fireSequenceChanged(i, bck, res);
+						}
+					}
+
+				};
+
+				
+				
+				showInputDialog("Input base", ((ModeleBasesComparison) _vp.getRNA().get_listeBases().get(i)).getBases(),  input);
 
 			} else {
 
-				String res = JOptionPane.showInputDialog(_vp, "Input base",
-						((ModeleBaseNucleotide) _vp.getRNA().get_listeBases()
-								.get(i)).getBase());
-				if (res != null) {
-					ModeleBaseNucleotide mb = (ModeleBaseNucleotide) _vp
-							.getRNA().get_listeBases().get(i);
-					String bck = mb.getBase();
-					mb.setBase(res);
-					_vp.repaint();
-					_vp.fireSequenceChanged(i, bck, res);
-				}
+				Runnable input = new Runnable() {
+
+					@Override
+					public void run() {
+						String res = (String) getDialogReturnValue();
+						if (res != null) {
+							ModeleBaseNucleotide mb = (ModeleBaseNucleotide) _vp.getRNA().get_listeBases().get(i);
+							String bck = mb.getBase();
+							mb.setBase(res);
+							_vp.repaint();
+							_vp.fireSequenceChanged(i, bck, res);
+						}
+					}
+
+				};
+				showInputDialog("Input base", ((ModeleBaseNucleotide) _vp.getRNA().get_listeBases().get(i)).getBase(), input);
 			}
 		}
 	}
@@ -608,26 +830,44 @@ public class VueUI {
 
 	public void UISetBorder() {
 		VueBorder border = new VueBorder(_vp);
-		Dimension oldBorder = _vp.getBorderSize();
+		final Dimension oldBorder = _vp.getBorderSize();
 		_vp.drawBBox(true);
 		_vp.drawBorder(true);
 		_vp.repaint();
-		if (JOptionPane.showConfirmDialog(_vp, border.getPanel(),
-				"Set new border size", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-			_vp.setBorderSize(oldBorder);
-		}
-		_vp.drawBorder(false);
-		_vp.drawBBox(false);
-		_vp.repaint();
+		Runnable cancel = new Runnable () {
+
+			@Override
+			public void run() {
+				_vp.setBorderSize(oldBorder);
+			}
+			
+		};
+		Runnable final_ = new Runnable () {
+
+			@Override
+			public void run() {
+				_vp.drawBorder(false);
+				_vp.drawBBox(false);
+				_vp.repaint();
+			}
+			
+		};
+		
+		showConfirmDialog(border.getPanel(), "Set new border size", null, cancel, cancel, final_);
 	}
 
 	public void UISetBackground() {
-		Color c = JColorChooser.showDialog(_vp, "Choose new background color",
-				_vp.getBackground());
-		if (c != null) {
-			_vp.setBackground(c);
-			_vp.repaint();
-		}
+		showColorDialog("Choose new background color", _vp.getBackground(), new Runnable() {
+
+			@Override
+			public void run() {
+				if (dialogReturnValue != null) {
+					_vp.setBackground((Color) dialogReturnValue);
+					_vp.repaint();
+				}
+			}
+			
+		});
 	}
 
 	public void UIZoomIn() {
@@ -665,30 +905,53 @@ public class VueUI {
 
 	public void UICustomZoom() {
 		VueZoom zoom = new VueZoom(_vp);
-		double oldZoom = _vp.getZoom();
-		double oldZoomAmount = _vp.getZoomIncrement();
+		final double oldZoom = _vp.getZoom();
+		final double oldZoomAmount = _vp.getZoomIncrement();
 		_vp.drawBBox(true);
 		_vp.repaint();
-		if (JOptionPane.showConfirmDialog(_vp, zoom.getPanel(), "Set zoom",
-				JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-			_vp.setZoom(oldZoom);
-			_vp.setZoomIncrement(oldZoomAmount);
-		}
-		_vp.drawBBox(false);
-		_vp.repaint();
+		Runnable cancel = new Runnable() {
+
+			@Override
+			public void run() {
+				_vp.setZoom(oldZoom);
+				_vp.setZoomIncrement(oldZoomAmount);
+			}
+			
+		};
+		Runnable final_ = new Runnable() {
+
+			@Override
+			public void run() {
+				_vp.drawBBox(false);
+				_vp.repaint();
+			}
+			
+		};
+		showConfirmDialog(zoom.getPanel(), "Set zoom", null, cancel, cancel, final_);
 	}
 
 	public void UIGlobalRescale() {
 		if (_vp.isModifiable()) {
 			if (_vp.getRNA().get_listeBases().size() > 0) {
-				VueGlobalRescale rescale = new VueGlobalRescale(_vp);
-				if (JOptionPane.showConfirmDialog(_vp, rescale.getPanel(),
-						"Rescales the whole RNA (No redraw)",
-						JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-					UIGlobalRescale(1. / rescale.getScale());
-				}
-				_vp.drawBBox(false);
-				_vp.repaint();
+				final VueGlobalRescale rescale = new VueGlobalRescale(_vp);
+				Runnable cancel = new Runnable() {
+
+					@Override
+					public void run() {
+						UIGlobalRescale(1. / rescale.getScale());
+					}
+					
+				};
+				Runnable final_ = new Runnable() {
+
+					@Override
+					public void run() {
+						_vp.drawBBox(false);
+						_vp.repaint();
+					}
+					
+				};
+				showConfirmDialog(rescale.getPanel(), "Rescales the whole RNA (No redraw)", null, cancel, cancel, final_);
 			}
 		}
 	}
@@ -708,13 +971,25 @@ public class VueUI {
 			if (_vp.getRNA().get_listeBases().size() > 0) {
 				_vp.drawBBox(true);
 				_vp.repaint();
-				VueGlobalRotation rotation = new VueGlobalRotation(_vp);
-				if (JOptionPane.showConfirmDialog(_vp, rotation.getPanel(),
-						"Rotates the whole RNA", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-					UIGlobalRotation(-rotation.getAngle());
-				}
-				_vp.drawBBox(false);
-				_vp.repaint();
+				final VueGlobalRotation rotation = new VueGlobalRotation(_vp);
+				Runnable cancel = new Runnable() {
+
+					@Override
+					public void run() {
+						UIGlobalRotation(-rotation.getAngle());
+					}
+					
+				};
+				Runnable final_ = new Runnable() {
+
+					@Override
+					public void run() {
+						_vp.drawBBox(false);
+						_vp.repaint();
+					}
+					
+				};
+				showConfirmDialog(rotation.getPanel(), "Rotates the whole RNA", null, cancel, cancel, final_, null);
 			}
 		}
 	}
@@ -732,127 +1007,166 @@ public class VueUI {
 	public void UISetBPStyle() {
 		if (_vp.getRNA().get_listeBases().size() > 0) {
 			VueStyleBP bpstyle = new VueStyleBP(_vp);
-			VARNAConfig.BP_STYLE bck = _vp.getBPStyle();
-			if (JOptionPane.showConfirmDialog(_vp, bpstyle.getPanel(),
-					"Set main base pair style", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-				_vp.setBPStyle(bck);
-				_vp.repaint();
-			}
+			final VARNAConfig.BP_STYLE bck = _vp.getBPStyle();
+			Runnable cancel = new Runnable() {
+
+				@Override
+				public void run() {
+					_vp.setBPStyle(bck);
+					_vp.repaint();
+				}
+				
+			};
+			showConfirmDialog(bpstyle.getPanel(), "Set main base pair style", null, cancel, cancel);
 		}
 	}
 
 	public void UISetTitleColor() {
 		if (_vp.isModifiable()) {
+			showColorDialog("Choose new title color", _vp.getTitleColor(), new Runnable() {
 
-			Color c = JColorChooser.showDialog(_vp, "Choose new title color",
-					_vp.getTitleColor());
-			if (c != null) {
-				_vp.setTitleColor(c);
-				_vp.repaint();
-			}
+				@Override
+				public void run() {
+					if (dialogReturnValue != null) {
+						_vp.setTitleColor((Color) dialogReturnValue);
+						_vp.repaint();
+					}
+				}
+				
+			});
 		}
 	}
 
 	public void UISetBackboneColor() {
 		if (_vp.isModifiable()) {
-			Color c = JColorChooser.showDialog(_vp,
-					"Choose new backbone color", _vp.getBackboneColor());
-			if (c != null) {
-				_vp.setBackboneColor(c);
-				_vp.repaint();
-			}
+			showColorDialog("Choose new backbone color", _vp.getBackboneColor(), new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialogReturnValue != null) {
+						_vp.setBackboneColor((Color) dialogReturnValue);
+						_vp.repaint();
+					}
+				}
+				
+			});
 		}
 	}
 
 	public void UISetTitleFont() {
 		if (_vp.isModifiable()) {
-			VueFont font = new VueFont(_vp);
-			if (JOptionPane.showConfirmDialog(_vp, font.getPanel(),
-					"New Title font", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-				_vp.setTitleFont(font.getFont());
-				_vp.repaint();
-			}
+			final VueFont font = new VueFont(_vp);
+			Runnable ok = new Runnable() {
+
+				@Override
+				public void run() {
+					_vp.setTitleFont(font.getFont());
+					_vp.repaint();
+				}
+
+			};
+			showConfirmDialog(font.getPanel(), "New Title font", ok, null);
 		}
 	}
 
 	public void UISetSpaceBetweenBases() {
 		if (_vp.isModifiable()) {
 
-			VueSpaceBetweenBases vsbb = new VueSpaceBetweenBases(_vp);
-			Double oldSpace = _vp.getSpaceBetweenBases();
-			if (JOptionPane.showConfirmDialog(_vp, vsbb.getPanel(),
-					"Set the space between each base",
-					JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-				_vp.setSpaceBetweenBases(oldSpace);
-				_vp.drawRNA(_vp.getRNA());
-				_vp.repaint();
-			}
+			final VueSpaceBetweenBases vsbb = new VueSpaceBetweenBases(_vp);
+			final Double oldSpace = _vp.getSpaceBetweenBases();
+			Runnable cancel = new Runnable () {
+
+				@Override
+				public void run() {
+					_vp.setSpaceBetweenBases(oldSpace);
+					_vp.drawRNA(_vp.getRNA());
+					_vp.repaint();
+				}
+				
+			};
+			showConfirmDialog(vsbb.getPanel(), "Set the space between each base", null, cancel, cancel);			
 		}
 	}
 
 	public void UISetBPHeightIncrement() {
 		if (_vp.isModifiable()) {
 
-			VueBPHeightIncrement vsbb = new VueBPHeightIncrement(_vp);
-			Double oldSpace = _vp.getBPHeightIncrement();
-			if (JOptionPane.showConfirmDialog(_vp, vsbb.getPanel(),
-					"Set the vertical increment in linear mode",
-					JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-				_vp.setBPHeightIncrement(oldSpace);
-				_vp.drawRNA(_vp.getRNA());
-				_vp.repaint();
-			}
+			VueBPHeightIncrement v = new VueBPHeightIncrement(_vp);
+			final Double oldSpace = _vp.getBPHeightIncrement();
+			Runnable cancel = new Runnable() {
+
+				@Override
+				public void run() {
+					_vp.setBPHeightIncrement(oldSpace);
+					_vp.drawRNA(_vp.getRNA());
+					_vp.repaint();
+				}
+				
+			};
+			showConfirmDialog(v.getPanel(), "Set the vertical increment in linear mode", null, cancel, cancel);
 		}
 	}
 
 	public void UISetNumPeriod() {
 		if (_vp.getRNA().get_listeBases().size() != 0) {
-			int oldNumPeriod = _vp.getNumPeriod();
+			final int oldNumPeriod = _vp.getNumPeriod();
 			VueNumPeriod vnp = new VueNumPeriod(_vp);
-			if (JOptionPane.showConfirmDialog(_vp, vnp.getPanel(),
-					"Set new numbering period", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-				_vp.setNumPeriod(oldNumPeriod);
-				_vp.repaint();
-			}
+			Runnable cancel = new Runnable() {
+
+				@Override
+				public void run() {
+					_vp.setNumPeriod(oldNumPeriod);
+					_vp.repaint();
+				}
+				
+			};
+			showConfirmDialog(vnp.getPanel(), "Set new numbering period", null, cancel, cancel);
 		}
 	}
 
 	public void UIEditBasePair() {
 		if (_vp.isModifiable()) {
-			ModeleBase mb = _vp.getRNA().get_listeBases()
-					.get(_vp.getNearestBase());
+			ModeleBase mb = _vp.getRNA().get_listeBases().get(_vp.getNearestBase());
 			if (mb.getElementStructure() != -1) {
-				ModeleBP msbp = mb.getStyleBP();
-				ModeleBP.Edge bck5 = msbp.getEdgePartner5();
-				ModeleBP.Edge bck3 = msbp.getEdgePartner3();
-				ModeleBP.Stericity bcks = msbp.getStericity();
+				final ModeleBP msbp = mb.getStyleBP();
+				final ModeleBP.Edge bck5 = msbp.getEdgePartner5();
+				final ModeleBP.Edge bck3 = msbp.getEdgePartner3();
+				final ModeleBP.Stericity bcks = msbp.getStericity();
 
 				VueBPType vbpt = new VueBPType(_vp, msbp);
+				Runnable cancel = new Runnable() {
 
-				if (JOptionPane.showConfirmDialog(_vp, vbpt.getPanel(),
-						"Set base pair L/W type", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-					msbp.setEdge5(bck5);
-					msbp.setEdge3(bck3);
-					msbp.setStericity(bcks);
-					_vp.repaint();
-				}
+					@Override
+					public void run() {
+						msbp.setEdge5(bck5);
+						msbp.setEdge3(bck3);
+						msbp.setStericity(bcks);
+						_vp.repaint();
+					}
+					
+				};
+				showConfirmDialog(vbpt.getPanel(), "Set base pair L/W type", null, cancel, cancel);
 			}
 		}
 	}
 
 	public void UIColorBasePair() {
 		if (_vp.isModifiable()) {
-			ModeleBase mb = _vp.getRNA().get_listeBases()
-					.get(_vp.getNearestBase());
+			ModeleBase mb = _vp.getRNA().get_listeBases().get(_vp.getNearestBase());
 			if (mb.getElementStructure() != -1) {
-				ModeleBP msbp = mb.getStyleBP();
-				Color c = JColorChooser.showDialog(_vp,
-						"Choose custom base pair color", msbp.getStyle()
-								.getColor(_vp.getConfig()._bondColor));
-				if (c != null) {
-					msbp.getStyle().setCustomColor(c);
-					_vp.repaint();
-				}
+				final ModeleBP msbp = mb.getStyleBP();
+				showColorDialog("Choose custom base pair color",
+						msbp.getStyle().getColor(_vp.getConfig()._bondColor), new Runnable() {
+
+					@Override
+					public void run() {
+						if (dialogReturnValue != null) {
+							msbp.getStyle().setCustomColor((Color) dialogReturnValue);
+							_vp.repaint();
+						}
+					}
+					
+				});
 			}
 		}
 	}
@@ -865,73 +1179,78 @@ public class VueUI {
 				ModeleBP msbp = mb.getStyleBP();
 				ArrayList<ModeleBP> bases = new ArrayList<ModeleBP>();
 				bases.add(msbp);
-				VueBPThickness vbpt = new VueBPThickness(_vp, bases);
-				if (JOptionPane.showConfirmDialog(_vp, vbpt.getPanel(),
-						"Set base pair(s) thickness",
-						JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
-					vbpt.restoreThicknesses();
-					_vp.repaint();
+				UIThicknessBasePairs(bases);
+			}
+		}
+	}
+
+	public void saveToPNG(final String filename) {
+		final VueJPEG jpeg = new VueJPEG(true, false);
+		Runnable ok = new Runnable() {
+
+			@Override
+			public void run() {
+				Double scale = jpeg.getScaleSlider().getValue() / 100.0;
+				BufferedImage myImage = new BufferedImage((int) Math.round(_vp.getWidth() * scale),
+						(int) Math.round(_vp.getHeight() * scale), BufferedImage.TYPE_INT_ARGB);
+				// BH j2s SwingJS: was BufferedImage.TRANSLUCENT, which is TYPE_INT_ARGB_PRE ?? no transparent background?
+				Graphics2D g2 = myImage.createGraphics();
+				AffineTransform AF = new AffineTransform();
+				AF.setToScale(scale, scale);
+				g2.setTransform(AF);
+				_vp.paintComponent(g2, !_vp.getConfig()._drawBackground);
+				g2.dispose();
+				try {
+					ImageIO.write(myImage, "PNG", new File(filename));
+				} catch (IOException e) {
+					// cannot throw an exception from Runnable.run()
+					_vp.errorDialog(new ExceptionExportFailed(e.getMessage(), filename));
 				}
 			}
-		}
+
+		};
+		showConfirmDialog(jpeg.getPanel(), "Set resolution", ok, null);
 	}
 
-	public void saveToPNG(String filename) throws ExceptionExportFailed {
-		VueJPEG jpeg = new VueJPEG(true, false);
-		if (JOptionPane.showConfirmDialog(_vp, jpeg.getPanel(),
-				"Set resolution", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-			Double scale = jpeg.getScaleSlider().getValue() / 100.0;
-			BufferedImage myImage = new BufferedImage((int) Math.round(_vp
-					.getWidth() * scale), (int) Math.round(_vp.getHeight()
-					* scale), BufferedImage.TRANSLUCENT);
-			Graphics2D g2 = myImage.createGraphics();
-			AffineTransform AF = new AffineTransform();
-			AF.setToScale(scale, scale);
-			g2.setTransform(AF);
-			_vp.paintComponent(g2, !_vp.getConfig()._drawBackground);
-			g2.dispose();
-			try {
-				ImageIO.write(myImage, "PNG", new File(filename));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	public void saveToJPEG(final String filename) {
+		final VueJPEG jpeg = new VueJPEG(true, true);
+		Runnable ok = new Runnable() {
 
-	public void saveToJPEG(String filename) throws ExceptionJPEGEncoding,
-			ExceptionExportFailed {
-		VueJPEG jpeg = new VueJPEG(true, true);
-		if (JOptionPane.showConfirmDialog(_vp, jpeg.getPanel(),
-				"Set resolution/quality", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-			Double scale;
-			if (jpeg.getScaleSlider().getValue() == 0)
-				scale = 1. / 100.;
-			else
-				scale = jpeg.getScaleSlider().getValue() / 100.;
+			@Override
+			public void run() {
+				Double scale;
+				if (jpeg.getScaleSlider().getValue() == 0)
+					scale = 1. / 100.;
+				else
+					scale = jpeg.getScaleSlider().getValue() / 100.;
 			BufferedImage myImage = new BufferedImage((int) Math.round(_vp
 					.getWidth() * scale), (int) Math.round(_vp.getHeight()
 					* scale), BufferedImage.TYPE_INT_RGB);
-			Graphics2D g2 = myImage.createGraphics();
-			AffineTransform AF = new AffineTransform();
-			AF.setToScale(scale, scale);
-			g2.setTransform(AF);
-			_vp.paintComponent(g2);
-			try {
+				Graphics2D g2 = myImage.createGraphics();
+				AffineTransform AF = new AffineTransform();
+				AF.setToScale(scale, scale);
+				g2.setTransform(AF);
+				_vp.paintComponent(g2);
+				try {
 				FileImageOutputStream out = new FileImageOutputStream(new File(
 						filename));
 				ImageWriter writer = ImageIO
 						.getImageWritersByFormatName("jpeg").next();
-				ImageWriteParam params = writer.getDefaultWriteParam();
-				params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-				params.setCompressionQuality(jpeg.getQualitySlider().getValue() / 100.0f);
-				writer.setOutput(out);
-				IIOImage myIIOImage = new IIOImage(myImage, null, null);
-				writer.write(null, myIIOImage, params);
-				out.close();
-			} catch (IOException e) {
-				throw new ExceptionExportFailed(e.getMessage(), filename);
+					ImageWriteParam params = writer.getDefaultWriteParam();
+					params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+					params.setCompressionQuality(jpeg.getQualitySlider().getValue() / 100.0f);
+					writer.setOutput(out);
+					IIOImage myIIOImage = new IIOImage(myImage, null, null);
+					writer.write(null, myIIOImage, params);
+					out.close();
+				} catch (IOException e) {
+					// cannot throw an exception from Runnable.run()
+					_vp.errorDialog(new ExceptionExportFailed(e.getMessage(), filename));
+				}
 			}
-		}
+
+		};
+		showConfirmDialog(jpeg.getPanel(), "Set resolution/quality", ok, null);
 	}
 
 	public void UIToggleShowNCBP() {
@@ -964,24 +1283,33 @@ public class VueUI {
 	}
 
 	public void UIPickSpecialBasesColor() {
-		Color c = JColorChooser.showDialog(_vp,
-				"Choose new special bases color",
-				_vp.getNonStandardBasesColor());
-		if (c != null) {
-			_vp.setNonStandardBasesColor(c);
-			_vp.setColorNonStandardBases(true);
-			_vp.repaint();
-		}
+		showColorDialog("Choose new special bases color", _vp.getNonStandardBasesColor(), new Runnable() {
+
+			@Override
+			public void run() {
+				if (dialogReturnValue != null) {
+					_vp.setNonStandardBasesColor((Color) dialogReturnValue);
+					_vp.setColorNonStandardBases(true);
+					_vp.repaint();
+				}
+			}
+			
+		});
 	}
 
 	public void UIPickGapsBasesColor() {
-		Color c = JColorChooser.showDialog(_vp, "Choose new gaps bases color",
-				_vp.getGapsBasesColor());
-		if (c != null) {
-			_vp.setGapsBasesColor(c);
-			_vp.setColorGapsBases(true);
-			_vp.repaint();
-		}
+		showColorDialog("Choose new gaps bases color", _vp.getGapsBasesColor(), new Runnable() {
+
+			@Override
+			public void run() {
+				if (dialogReturnValue != null) {
+					_vp.setGapsBasesColor((Color) dialogReturnValue);
+					_vp.setColorGapsBases(true);
+					_vp.repaint();
+				}
+			}
+			
+		});
 	}
 
 	public void UIBaseTypeColor() {
@@ -1007,11 +1335,17 @@ public class VueUI {
 	}
 
 	public void UIAbout() {
-		VueAboutPanel about = new VueAboutPanel();
-		JOptionPane.showMessageDialog(_vp, about, "About VARNA "
-				+ VARNAConfig.MAJOR_VERSION + "." + VARNAConfig.MINOR_VERSION,
-				JOptionPane.PLAIN_MESSAGE);
-		about.gracefulStop();
+		final VueAboutPanel about = new VueAboutPanel();
+		Runnable ok = new Runnable() {
+
+			@Override
+			public void run() {
+				about.gracefulStop();
+			}
+			
+		};
+		showMessageDialog(about, "About VARNA " + VARNAConfig.MAJOR_VERSION + "." + VARNAConfig.MINOR_VERSION,
+				JOptionPane.PLAIN_MESSAGE, ok, ok);
 	}
 
 	public void UIAutoAnnotateHelices() {
@@ -1059,8 +1393,8 @@ public class VueUI {
 		vue.show();
 	}
 
-	public void UIAnnotationAddFromStructure(TextAnnotation.AnchorType type,
-			ArrayList<Integer> listeIndex) throws Exception {
+	public void UIAnnotationAddFromStructure(TextAnnotation.AnchorType type, ArrayList<Integer> listeIndex)
+			throws Exception {
 		TextAnnotation textAnnot;
 		ArrayList<ModeleBase> listeBase;
 		VueAnnotation vue;
@@ -1248,8 +1582,7 @@ public class VueUI {
 			try {
 				ModeleBase mb = _vp.getBaseAt(new Point2D.Double(x, y));
 				if (mb != null) {
-					ArrayList<Integer> v = _vp.getRNA()
-							.findHelix(mb.getIndex());
+					ArrayList<Integer> v = _vp.getRNA().findHelix(mb.getIndex());
 					ArrayList<ModeleBase> mbs = _vp.getRNA().getBasesAt(v);
 					TextAnnotation textAnnot;
 					textAnnot = new TextAnnotation("", mbs,
@@ -1333,8 +1666,7 @@ public class VueUI {
 		}
 	}
 
-	public void UIShiftBaseCoord(ArrayList<Integer> indices, double dx,
-			double dy) {
+	public void UIShiftBaseCoord(ArrayList<Integer> indices, double dx, double dy) {
 		if (_vp.isModifiable()) {
 			Hashtable<Integer, Point2D.Double> backupPos = new Hashtable<Integer, Point2D.Double>();
 
@@ -1343,8 +1675,7 @@ public class VueUI {
 				Point2D.Double d = mb.getCoords();
 				backupPos.put(index, d);
 				_vp.getRNA().setCoord(index, d.x + dx, d.y + dy);
-				_vp.getRNA().setCenter(index, mb.getCenter().x + dx,
-						mb.getCenter().y + dy);
+				_vp.getRNA().setCenter(index, mb.getCenter().x + dx, mb.getCenter().y + dy);
 			}
 			_undoableEditSupport.postEdit(new VARNAEdits.BasesShiftEdit(
 					indices, dx, dy, _vp));
@@ -1581,5 +1912,21 @@ public class VueUI {
 		}
 		return angle;
 	}
+
+	public void UIThicknessBasePairs(ArrayList<ModeleBP> bases) {
+		final VueBPThickness vbpt = new VueBPThickness(_vp, bases);
+		Runnable cancel = new Runnable() {
+
+			@Override
+			public void run() {
+				vbpt.restoreThicknesses();
+				_vp.repaint();
+			}
+			
+		};
+		showConfirmDialog(vbpt.getPanel(), "Set base pair(s) thickness", null, cancel, cancel);
+	}
+	
+	
 
 }

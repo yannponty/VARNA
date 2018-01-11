@@ -20,15 +20,17 @@ package fr.orsay.lri.varna.controlers;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import fr.orsay.lri.varna.components.BaseSpecialColorEditor;
 import fr.orsay.lri.varna.models.BaseList;
 import fr.orsay.lri.varna.models.rna.ModeleBase;
-import fr.orsay.lri.varna.models.rna.ModeleBaseNucleotide;
-import fr.orsay.lri.varna.views.VueBases;
 
-public class ControleurBaseSpecialColorEditor implements ActionListener {
+/**
+ * BH SwingJS - additions here to allow asynchronous JColorChooser  
+ */
+public class ControleurBaseSpecialColorEditor implements ActionListener, ComponentListener {  // BH SwingJS
 
 	private BaseSpecialColorEditor _specialColorEditor;
 
@@ -52,10 +54,18 @@ public class ControleurBaseSpecialColorEditor implements ActionListener {
 					_specialColorEditor.getCurrentColor());
 			_specialColorEditor.getColorChooser().setColor(
 					_specialColorEditor.getCurrentColor());
+			
+			// BH SwingJS in JavaScript, this is not modal. 
+			// We have to set a callback to stop the editing.
+			
+			_specialColorEditor.getDialog().removeComponentListener(this);
+			_specialColorEditor.getDialog().addComponentListener(this);
 			_specialColorEditor.getDialog().setVisible(true);
-
+			
+			
 			// Make the renderer reappear.
-			_specialColorEditor.callFireEditingStopped();
+			// BH SwingJS not so fast...
+			//_specialColorEditor.callFireEditingStopped();
 
 		} else { // User pressed dialog's "OK" button.
 			_specialColorEditor.setCurrentColor(_specialColorEditor
@@ -96,6 +106,26 @@ public class ControleurBaseSpecialColorEditor implements ActionListener {
 					.setBaseNumberColor(couleur);
 		}
 
+	}
+
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		
+		_specialColorEditor.callFireEditingStopped(); // BH SwingJS -- need to catch this
+		
 	}
 
 }

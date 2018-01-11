@@ -20,16 +20,23 @@ package fr.orsay.lri.varna.views;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.Timer;
 
 import fr.orsay.lri.varna.VARNAPanel;
 import fr.orsay.lri.varna.exceptions.ExceptionNonEqualLength;
 import fr.orsay.lri.varna.models.VARNAConfig;
 
+/**
+ * BH j2s SwingJS replaces thread with simple javax.swing.Timer
+ * 
+ */
 public class VueAboutPanel extends JPanel {
 
 	/**
@@ -115,7 +122,7 @@ public class VueAboutPanel extends JPanel {
 		_anim.gracefulStop();
 	}
 
-	private class AboutAnimator extends Thread {
+	private class AboutAnimator implements ActionListener {
 		VARNAPanel _vp;
 		ArrayList<String> _structures = new ArrayList<String>();
 		ArrayList<String> _sequences = new ArrayList<String>();
@@ -125,6 +132,28 @@ public class VueAboutPanel extends JPanel {
 		public AboutAnimator(VARNAPanel vp) {
 			super();
 			_vp = vp;
+		}
+
+		/**
+		 * mode pointer for timer cycle -- DELAY1, TASK, DELAY2, STOP
+		 */
+		int mode = 0;
+		
+		/**
+		 * modes for run()
+		 * 
+		 */
+		final int DELAY1 = 0, TASK = 1, DELAY2 = 2, STOP = 3;
+		int i = 0;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			run();
+		}
+
+		public void start() {
+			int mode = DELAY1;
+			run();
 		}
 
 		public void addRNA(String seq, String str) {
@@ -137,23 +166,45 @@ public class VueAboutPanel extends JPanel {
 		}
 
 		public void run() {
-			try {
-				int i = 0;
-				while (!_over) {
-					sleep(_period);
-					String seq = _sequences.get(i);
-					String str = _structures.get(i);
+			int initialDelay;
+			if (_over)
+				mode = STOP;
+			switch (mode) {
+			case DELAY1:
+				mode = TASK;
+				initialDelay = _period;
+				break;
+			case TASK:
+				String seq = _sequences.get(i);
+				String str = _structures.get(i);
+				try {
 					_vp.drawRNAInterpolated(seq, str);
-					sleep(500);
-					i = (i + 1) % _sequences.size();
+					mode = DELAY2;
+					initialDelay = 500;
+				} catch (ExceptionNonEqualLength e) {
+					initialDelay = -1;
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExceptionNonEqualLength e) {
-				e.printStackTrace();
+				break;
+			case DELAY2:
+				i = (i + 1) % _sequences.size();
+				mode = DELAY1;
+				initialDelay = 0;
+				break;
+			case STOP:
+			default:
+				initialDelay = -1;
+				break;
 			}
-		}
+			if (initialDelay >= 0) {
+				Timer t = new Timer(initialDelay, this);
+				t.setDelay(0);
+				t.setRepeats(false);
+				t.start();
+			} else {
+				System.out.println("VueAbout done");
+			}
 
+		}
 	}
 
 }
