@@ -28,6 +28,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import fr.orsay.lri.varna.views.VueAnnotation;
+import fr.orsay.lri.varna.views.VueUI;
 
 /**
  * Annotation View Controller
@@ -38,7 +39,7 @@ import fr.orsay.lri.varna.views.VueAnnotation;
 public class ControleurVueAnnotation implements CaretListener, ChangeListener,
 		ActionListener {
 
-	private VueAnnotation _vueAnnot;
+	protected VueAnnotation _vueAnnot;
 
 	/**
 	 * Creates a ControleurVueAnnotation
@@ -59,11 +60,25 @@ public class ControleurVueAnnotation implements CaretListener, ChangeListener,
 
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getActionCommand().equals("setcolor")) {
-			Color c = JColorChooser.showDialog(_vueAnnot.get_vp(),
-					"Pick a color", _vueAnnot.getTextAnnotation().getColor());
-			if (c != null) {
-				_vueAnnot.updateColor(c);
-			}
+			final VueUI vui = _vueAnnot.get_vp().getVARNAUI(); // BH SwingJS
+			vui.showColorDialog("Pick a color", _vueAnnot.getTextAnnotation().getColor(), new Runnable() {
+
+				@Override
+				public void run() {
+					Color c = (Color) vui.dialogReturnValue;
+					if (c != null)
+						_vueAnnot.updateColor(c);
+					_vueAnnot.update();
+				}
+				
+			});
+			
+//was:			Color c = JColorChooser.showDialog(_vueAnnot.get_vp(),
+//					"Pick a color", _vueAnnot.getTextAnnotation().getColor());
+//			if (c != null) {
+//				_vueAnnot.updateColor(c);
+//			}
+
 		}
 		_vueAnnot.update();
 	}

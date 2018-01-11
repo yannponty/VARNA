@@ -181,11 +181,8 @@ public class VueUI {
 	 * @param input
 	 * @param close_final_error optional [close,finally,error]
 	 */
-	public void showColorDialog(String message, Object initialValue, Runnable color, Runnable... close_final_error) {
-		objectCallback = color;
-		closeBtnCallback = (close_final_error.length > 0 ? close_final_error[0] : null);
-		finalCallback = (close_final_error.length > 1 ? close_final_error[1] : null);
-		errorCallback = (close_final_error.length > 2 ? close_final_error[2] : null);		
+	public void showColorDialog(String message, Object initialValue, Runnable ret) {
+		objectCallback = ret;
 		onDialogReturn(JColorChooser.showDialog(_vp, message, (Color) initialValue));
 	}
 
