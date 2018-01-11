@@ -769,8 +769,8 @@ public class VARNAPanel extends JPanel implements PropertyChangeListener {
 		case "value":
 			_UI.onDialogReturn(val == null ? JOptionPane.CLOSED_OPTION : ((Integer) val).intValue());
 			return;
-		case "fileSelected":
-		case "colorSelected":
+		case "SelectedFile":
+		case "SelectedColor":
 		case "inputValue":
 			_UI.onDialogReturn(val);
 			break;
