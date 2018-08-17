@@ -32,13 +32,32 @@ public class PseudoKnot extends StronglyConnectedComponent{
 		this.initializeListPoints();
 		this.initializeListCenters();
 		this.assignStrands();
+		System.out.println("[A]");
+		System.out.flush();
 		this.initializeDistances();
+		System.out.println("[B]");
+		System.out.flush();
 		this.setDrawYs();
+		System.out.println("[C]");
+		System.out.flush();
 		this.setDrawXs();
+		System.out.println("[D]");
+		System.out.flush();
 		this.assignPointsAndCentersElementsFromStrands();
+		System.out.println("[E]");
+		System.out.flush();
 		this.positionChildrenAroundStrands();
+		System.out.println("[F]");
+		System.out.flush();
 		this.assignPointsAndCentersElementsFromTrombones();
+		System.out.println("[G]");
+		System.out.flush();
+		this.positionPseudoKnotCorrectly();
+		System.out.println("[H]");
+		System.out.flush();
 		this.buildBoundingBox();
+		System.out.println("[I]");
+		System.out.flush();
 	}
 	
 	public void assignStrands(){
@@ -646,6 +665,6 @@ public class PseudoKnot extends StronglyConnectedComponent{
 		else {
 			rotation_angle = Math.acos((scalar_product)/this.getDistanceBetweenExtrema());
 		}
-		//this.rotate(rotation_center, rotation_angle);
+		this.rotate(rotation_center, rotation_angle);
 	}
 }

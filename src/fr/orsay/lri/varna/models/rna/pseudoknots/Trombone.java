@@ -98,14 +98,17 @@ public class Trombone {
 		Couple<Point2D.Double,Point2D.Double> c2 = new Couple<Point2D.Double,Point2D.Double>();
 		Couple<Integer,Point2D.Double> point;
 		Couple<Integer,Point2D.Double> center;
+		System.out.println();
 		while(!eval_length) {
 			delta = (trombone_length - Math.PI*trombone_radius - dy_first_last)/2.0;
 			pos = (1.0/(this.nb_base+1));
 			c1 = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
 			pos = (1.0/(this.nb_base+1))*this.nb_base;
 			c2 = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
-			boolean eval1 = c1.first.getX() == this.first_point.getX() && (Math.abs(c1.first.getY() - this.first_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
-			boolean eval2 = c2.first.getX() == this.last_point.getX() && (Math.abs(c2.first.getY() - this.last_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
+			//boolean eval1 = c1.first.getX() == this.first_point.getX() && (Math.abs(c1.first.getY() - this.first_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
+			//boolean eval2 = c2.first.getX() == this.last_point.getX() && (Math.abs(c2.first.getY() - this.last_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
+			boolean eval1 = (Math.abs(c1.first.getY() - this.first_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
+		    boolean eval2 = (Math.abs(c2.first.getY() - this.last_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
 			if(eval1 && eval2){
 				index = this.first_index + 1;
 				point = new Couple<Integer,Point2D.Double>(index,c1.first);

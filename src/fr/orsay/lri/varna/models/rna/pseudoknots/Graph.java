@@ -3,6 +3,7 @@ package fr.orsay.lri.varna.models.rna.pseudoknots;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 import fr.orsay.lri.varna.models.rna.ModeleBP;
@@ -17,10 +18,27 @@ public class Graph {
 		this.scc = new ArrayList<StronglyConnectedComponent>();
 		this.exceptions = new ArrayList<Node>();
 		
+		HashSet<Couple<Integer,Integer>> stackedPairs = new HashSet<Couple<Integer,Integer>>(); 
+		
 		for(ModeleBP bp : bps){
-			Node n = new Node(bp.getIndex5(), bp.getIndex3());
-			this.nodes.add(n);
+			int i = bp.getIndex5();
+			int j = bp.getIndex3();
+			stackedPairs.add(new Couple<Integer,Integer>(i+1,j-1));
+			stackedPairs.add(new Couple<Integer,Integer>(i-1,j+1));
 		}
+		
+		for(ModeleBP bp : bps){
+			int i = bp.getIndex5();
+			int j = bp.getIndex3();
+			Node n = new Node(i, j);
+			if (stackedPairs.contains(new Couple<Integer,Integer>(i,j))){
+				this.nodes.add(n);
+			}
+			else{
+				this.exceptions.add(n);
+			}
+		}
+		
 		for(Node i : nodes){
 			for(Node j : nodes){
 				if(!i.equals(j) && i.intersection(j) && !i.containsChild(j)){
@@ -29,6 +47,8 @@ public class Graph {
 				}
 			}
 		}
+		
+		
 		
 		this.sortNodes();
 		
