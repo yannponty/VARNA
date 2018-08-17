@@ -12,6 +12,12 @@ public class Couple<T,U> {
 		first = a;
 		second = b;
 	}
+	
+	public Couple()
+	{
+		first = null;
+		second = null;
+	}
 
 	public boolean equals( Object c)
 	{

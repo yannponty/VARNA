@@ -850,7 +850,7 @@ public class VARNASecDraw {
 						GeneralPath p = new GeneralPath();
 						for (int i=0;i<all.size();i++)
 						{ p.append(all.get(i).getShape(),false); }
-						r._debugShape = p;
+						r._debugShape.add(p);
 						_vp.paintImmediately(0, 0, _vp.getWidth(), _vp.getHeight());	
 					}				
 
