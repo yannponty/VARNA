@@ -119,7 +119,6 @@ public class SwingGraphics implements VueVARNAGraphics {
 	
 	private BasicStroke deriveStroke(BasicStroke s, double t)
 	{
-		t = Math.max(0.,t);
 		return new BasicStroke((float)t, s.getEndCap(), s.getLineJoin(), s.getMiterLimit(), s.getDashArray(), s.getDashPhase()) ;
 	}
 

@@ -658,7 +658,6 @@ import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.print.PrinterException;
@@ -2189,21 +2188,16 @@ public class VARNAPanel extends JPanel {
 			renderAnnotations(g2D, offX, offY, offsetRNA.x, offsetRNA.y,
 					scaleFactor);
 			// Draw additional debug shape
-			if (!_RNA._debugShape.isEmpty()) {
-				for(GeneralPath gp : _RNA._debugShape){
-					Color c = new Color(255, 0, 0, 50);
-					g2D.setColor(c);
-					AffineTransform at = new AffineTransform();
-					at.translate(offX - scaleFactor * rnabbox.x, offY - scaleFactor
-							* rnabbox.y);
-					at.scale(scaleFactor, scaleFactor);
-					Shape s = at.createTransformedShape(gp);
-					if (s instanceof GeneralPath) {			
-						g2D.fill((GeneralPath) s);
-					}
-					if (s instanceof Path2D.Double) {			
-						g2D.fill(new GeneralPath((Path2D.Double) s));
-					}
+			if (_RNA._debugShape != null) {
+				Color c = new Color(255, 0, 0, 50);
+				g2D.setColor(c);
+				AffineTransform at = new AffineTransform();
+				at.translate(offX - scaleFactor * rnabbox.x, offY - scaleFactor
+						* rnabbox.y);
+				at.scale(scaleFactor, scaleFactor);
+				Shape s = at.createTransformedShape(_RNA._debugShape);
+				if (s instanceof GeneralPath) {
+					g2D.fill((GeneralPath) s);
 				}
 			}
 		} else {

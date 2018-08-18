@@ -209,11 +209,6 @@ public abstract class ModeleBase implements Serializable, java.lang.Comparable<M
 		this._coords.x = coords.x;
 		this._coords.y = coords.y;
 	}
-	
-	public void setCoords(double x, double y) {
-		this._coords.x = x;
-		this._coords.y = y;
-	}
 
 	public Point2D.Double getCenter() {
 		return new Point2D.Double(_center.x,_center.y);
@@ -222,11 +217,6 @@ public abstract class ModeleBase implements Serializable, java.lang.Comparable<M
 	public void setCenter(Point2D.Double center) {
 		this._center.x = center.x;
 		this._center.y = center.y;
-	}
-	
-	public void setCenter(double x, double y) {
-		this._center.x = x;
-		this._center.y = y;
 	}
 
 	public String getLabel() {
