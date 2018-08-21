@@ -2195,9 +2195,11 @@ public class VARNAPanel extends JPanel {
 				at.translate(offX - scaleFactor * rnabbox.x, offY - scaleFactor
 						* rnabbox.y);
 				at.scale(scaleFactor, scaleFactor);
-				Shape s = at.createTransformedShape(_RNA._debugShape);
-				if (s instanceof GeneralPath) {
-					g2D.fill((GeneralPath) s);
+				for(GeneralPath p: _RNA._debugShape) {
+					Shape s = at.createTransformedShape(p);
+					if (s instanceof GeneralPath) {
+						g2D.fill((GeneralPath) s);
+					}
 				}
 			}
 		} else {

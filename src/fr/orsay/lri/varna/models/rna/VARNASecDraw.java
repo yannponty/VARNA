@@ -178,8 +178,12 @@ public class VARNASecDraw {
 			_depth++;
 			for (int i=0;i<_portions.size();i++ )
 			{
-				result += String.format("%1$#" + _depth + "s", ' ');
+				System.out.println("[X]");
+				//result += String.format("%1$#" + _depth + "s", ' ');
+				result += "  ";
+				System.out.println("[Y]");
 				result += _portions.get(i).toString();
+				System.out.println("[Z]");
 				if (i<_portions.size()-1)
 				  result += "\n";
 			}
@@ -452,7 +456,6 @@ public class VARNASecDraw {
 			placement[i] = (int)Math.round(val);
 			val += inc;
 		}
-		System.out.println();
 		double angleIncr = 2.0*Math.PI/(double)MAX_NUM_DIR;
 		while(collision)
 		{
@@ -486,20 +489,28 @@ public class VARNASecDraw {
 				}
 				else if (p instanceof UnpairedPortion)
 				{
+					System.out.println("[AB]"+p);
 					UnpairedPortion up = (UnpairedPortion) p;
+					double prev = dir + placement[curH]*angleIncr;
+					double next = dir + 2.*Math.PI;
+					if (curH<placement.length-1) {
+						next = dir + placement[curH+1]*angleIncr;
+					}
+					double locIncr = (prev - next)/(up._len+1);
 					for(int j=0;j<up._len;j++)
 					{
-						/*ndir = dir + circ*angleIncr;
+							double ndir = prev + locIncr*(j+1.);
 							double vx = Math.cos(ndir);
 							double vy = Math.sin(ndir);
 							double nx = x+((radius)*vx);
 							double ny = y+((radius)*vy);
-							r.get_listeBases().get(up._pos+j).set_coords(new Point2D.Double(nx,ny));
-							circ += mod*r.LOOP_DISTANCE;*/
-						r.get_listeBases().get(up._pos+j).setCoords(new Point2D.Double(x,y));
+							r.get_listeBases().get(up._pos+j).setCoords(new Point2D.Double(nx,ny));
+//						r.get_listeBases().get(up._pos+j).setCoords(new Point2D.Double(x,y));
 					}
 				}
 				//System.out.println(dir);
+				//RNA.distributeUnpaired(radius,angleNext, angleRightPartner, base, center,nextBases);
+
 			}
 			if(shapes.size()>0)
 			{
@@ -830,8 +841,11 @@ public class VARNASecDraw {
 	public RNATree drawRNA(double dirAngle, RNA r) {
 		RNATree t = new RNATree();
 		buildTree(0, r.get_listeBases().size() - 1, t,  r );
+		System.out.println("[B]");
+
 		System.out.println(t);
 		ArrayList<HelixEmbedding> all = new ArrayList<HelixEmbedding>();
+		System.out.println("[C]");
 		HelixEmbedding root = null;
 		try {
 			root = new HelixEmbedding(new Point2D.Double(0.0,0.0),new PairedPortion(0,0,0,t),r,null); 
@@ -841,6 +855,7 @@ public class VARNASecDraw {
 			while((steps>0)&&(prevbadness>0))
 			{
 
+				System.out.println("[D]");
 				// Generating new structure
 				HelixEmbedding chosen = all.get(_rnd.nextInt(all.size()));
 				int delta =  chosen.chooseNextMove();
@@ -850,7 +865,7 @@ public class VARNASecDraw {
 						GeneralPath p = new GeneralPath();
 						for (int i=0;i<all.size();i++)
 						{ p.append(all.get(i).getShape(),false); }
-						r._debugShape = p;
+						r._debugShape.add(p);
 						_vp.paintImmediately(0, 0, _vp.getWidth(), _vp.getHeight());	
 					}				
 

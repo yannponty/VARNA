@@ -195,6 +195,7 @@ public class VueUI {
 
 	public void UIVARNAView() {
 		if (_vp.isModifiable()) {
+			System.out.println("VARNAView");
 			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
 			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
 					RNA.DRAW_MODE_VARNA_VIEW, _vp));
@@ -204,6 +205,21 @@ public class VueUI {
 			_vp.fireLayoutChanged(bck);
 		}
 	}
+	
+
+	public void UIPK() {
+		if (_vp.isModifiable()) {
+			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
+			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
+					RNA.DRAW_MODE_VARNA_VIEW, _vp));
+			_vp.reset();
+			_vp.drawRNA(_vp.getRNA(), RNA.DRAW_MODE_PK);
+			_vp.repaint();
+			_vp.fireLayoutChanged(bck);
+		}
+	}
+
+
 
 	public void UIReset() {
 		if (_vp.isModifiable()) {
@@ -1581,5 +1597,4 @@ public class VueUI {
 		}
 		return angle;
 	}
-
 }

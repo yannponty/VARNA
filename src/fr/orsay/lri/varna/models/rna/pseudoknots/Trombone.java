@@ -94,8 +94,8 @@ public class Trombone {
 		double pos = 0;
 		int index = 0;
 		boolean eval_length = false;
-		Couple<Point2D.Double,Point2D.Double> c1 = new Couple<Point2D.Double,Point2D.Double>();
-		Couple<Point2D.Double,Point2D.Double> c2 = new Couple<Point2D.Double,Point2D.Double>();
+		Couple<Point2D.Double,Point2D.Double> c1;
+		Couple<Point2D.Double,Point2D.Double> c2;
 		Couple<Integer,Point2D.Double> point;
 		Couple<Integer,Point2D.Double> center;
 		System.out.println();

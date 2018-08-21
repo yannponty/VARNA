@@ -280,10 +280,15 @@ public class ControleurVARNAPanelKeys implements KeyListener, FocusListener {
 				break;
 			case (KeyEvent.VK_5):
 				if (controlDown) {
-					ui.UIVARNAView();
+					ui.UIPK();
 				}
 				break;
 			case (KeyEvent.VK_6):
+				if (controlDown) {
+					ui.UIVARNAView();
+				}
+				break;
+			case (KeyEvent.VK_7):
 				if (controlDown) {
 					ui.UIMOTIFView();
 				}
