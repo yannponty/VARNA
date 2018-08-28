@@ -52,7 +52,7 @@ public class PseudoKnot extends StronglyConnectedComponent{
 		this.assignPointsAndCentersElementsFromTrombones();
 		System.out.println("[G]");
 		System.out.flush();
-		this.positionPseudoKnotCorrectly();
+		//this.positionPseudoKnotCorrectly();
 		System.out.println("[H]");
 		System.out.flush();
 		this.buildBoundingBox();

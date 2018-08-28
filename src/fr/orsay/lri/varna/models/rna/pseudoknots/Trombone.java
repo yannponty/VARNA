@@ -90,6 +90,25 @@ public class Trombone {
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
 		double dy_first_last = Math.abs(this.last_point.getY() - this.first_point.getY());
 		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
+		double delta = (trombone_length - Math.PI*trombone_radius - dy_first_last)/2.;
+		delta = Math.max(delta, 0);
+		for(int i = 1; i <= this.nb_base; i++){
+			double pos = (1.0/(this.nb_base+1))*i;
+			Couple<Point2D.Double,Point2D.Double> c = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
+			int index = this.first_index + i;
+			Couple<Integer,Point2D.Double> point = new Couple<Integer,Point2D.Double>(index,c.first);
+			Couple<Integer,Point2D.Double> center = new Couple<Integer,Point2D.Double>(index,c.second);
+			this.points.add(point);
+			this.centers.add(center);
+		}
+		for(Couple<Integer,Point2D.Double> c : points){
+			//System.out.println("POINTS "+c.first+" "+c.second.getY());
+		}
+	}
+	/*public void assignPointsAndCentersCoords(){
+		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
+		double dy_first_last = Math.abs(this.last_point.getY() - this.first_point.getY());
+		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
 		double delta = 0;
 		double pos = 0;
 		int index = 0;
@@ -135,7 +154,7 @@ public class Trombone {
 			this.points.add(1,point);
 			this.centers.add(1,center);
 		}
-	}
+	}*/
 	/*public void AssignPointsandCentersCoords(){
 		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;

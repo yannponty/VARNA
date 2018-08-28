@@ -31,12 +31,12 @@ public class Graph {
 			int i = bp.getIndex5();
 			int j = bp.getIndex3();
 			Node n = new Node(i, j);
-			if (stackedPairs.contains(new Couple<Integer,Integer>(i,j))){
+			//if (stackedPairs.contains(new Couple<Integer,Integer>(i,j))){
 				this.nodes.add(n);
-			}
+			/*}
 			else{
 				this.exceptions.add(n);
-			}
+			}*/
 		}
 		
 		for(Node i : nodes){
