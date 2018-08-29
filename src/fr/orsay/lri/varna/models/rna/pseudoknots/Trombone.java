@@ -89,12 +89,14 @@ public class Trombone {
 	public void assignPointsAndCentersCoords(){
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
 		double dy_first_last = Math.abs(this.last_point.getY() - this.first_point.getY());
-		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
-		double delta = (trombone_length - Math.PI*trombone_radius - dy_first_last)/2.;
+		double trombone_minimal_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
+		double delta = (trombone_minimal_length - Math.PI*trombone_radius - dy_first_last)/2.;
 		delta = Math.max(delta, 0);
+		double trombone_length = Math.PI*trombone_radius + 2*delta + dy_first_last;
+		double gap_length = trombone_length - trombone_minimal_length;
 		for(int i = 1; i <= this.nb_base; i++){
 			double pos = (1.0/(this.nb_base+1))*i;
-			Couple<Point2D.Double,Point2D.Double> c = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
+			Couple<Point2D.Double,Point2D.Double> c = this.findPointandCenter(trombone_minimal_length, trombone_length, delta, dy_first_last, trombone_radius, pos, gap_length);
 			int index = this.first_index + i;
 			Couple<Integer,Point2D.Double> point = new Couple<Integer,Point2D.Double>(index,c.first);
 			Couple<Integer,Point2D.Double> center = new Couple<Integer,Point2D.Double>(index,c.second);
@@ -181,13 +183,15 @@ public class Trombone {
 		//System.out.println("TESTA "+points.size());
 	}*/
 
-	private Couple<Point2D.Double,Point2D.Double> findPointandCenter(double trombone_length, double delta, double dy_first_last, double trombone_radius, double pos) {
+	private Couple<Point2D.Double,Point2D.Double> findPointandCenter(double trombone_minimal_length, double trombone_length, double delta, double dy_first_last, double trombone_radius, double pos, double gap_length) {
 		Point2D.Double point = new Point2D.Double();
 		Point2D.Double center = new Point2D.Double();
-		double p = trombone_length * pos;
+		double p = trombone_minimal_length * pos;
+		System.out.println("pos "+pos+"p "+p+"delta "+delta+"rad "+Math.PI*trombone_radius);
 		double x1,y1,x2,y2;
 		if(this.even_strand){
 			if(this.first_point.getY() < this.last_point.getY()){
+				p += gap_length;
 				if(p < delta){
 					x1 = this.first_point.getX();
 					y1 = this.first_point.getY() - p;
@@ -253,6 +257,7 @@ public class Trombone {
 				}
 			}
 			else {
+				p += gap_length;
 				if(p < delta){
 					x1 = this.first_point.getX();
 					y1 = this.first_point.getY() + p;
