@@ -3,149 +3,153 @@ package fr.orsay.lri.varna.models.rna.pseudoknots;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 import fr.orsay.lri.varna.models.rna.ModeleBP;
 
 public class Graph {
 	private ArrayList<Node> nodes;
-	private ArrayList<StronglyConnectedComponent> scc;
+	private ArrayList<ConnectedComponent> cc;
 	private ArrayList<Node> exceptions;
+	private AbstractFactoryCC factoryCC;
 
+	
+	
+	public Graph(ArrayList<Node> nodes, AbstractFactoryCC factoryCC) {
+		this.nodes = nodes;
+		this.cc = new ArrayList<ConnectedComponent>();
+		this.exceptions = new ArrayList<Node>();
+		this.factoryCC = factoryCC;
+	}
 	public Graph(ArrayList<ModeleBP> bps, int nb_bases) {
 		this.nodes = new ArrayList<Node>();
-		this.scc = new ArrayList<StronglyConnectedComponent>();
+		this.cc = new ArrayList<ConnectedComponent>();
 		this.exceptions = new ArrayList<Node>();
 		
-		HashSet<Couple<Integer,Integer>> stackedPairs = new HashSet<Couple<Integer,Integer>>(); 
-		
-		for(ModeleBP bp : bps){
-			int i = bp.getIndex5();
-			int j = bp.getIndex3();
-			stackedPairs.add(new Couple<Integer,Integer>(i+1,j-1));
-			stackedPairs.add(new Couple<Integer,Integer>(i-1,j+1));
+		/*HashSet<Couple<Integer,Integer>> stackedPairs = new HashSet<Couple<Integer,Integer>>(); 
+
+	for(ModeleBP bp : bps){
+		int i = bp.getIndex5();
+		int j = bp.getIndex3();
+		stackedPairs.add(new Couple<Integer,Integer>(i+1,j-1));
+		stackedPairs.add(new Couple<Integer,Integer>(i-1,j+1));
+	}
+	
+	for(ModeleBP bp : bps){
+		int i = bp.getIndex5();
+		int j = bp.getIndex3();
+		Node n = new Node(i, j);
+		//if (stackedPairs.contains(new Couple<Integer,Integer>(i,j))){
+			this.nodes.add(n);
 		}
-		
-		for(ModeleBP bp : bps){
-			int i = bp.getIndex5();
-			int j = bp.getIndex3();
-			Node n = new Node(i, j);
-			//if (stackedPairs.contains(new Couple<Integer,Integer>(i,j))){
-				this.nodes.add(n);
-			/*}
-			else{
-				this.exceptions.add(n);
-			}*/
+		else{
+			this.exceptions.add(n);
 		}
-		
-		for(Node i : nodes){
-			for(Node j : nodes){
-				if(!i.equals(j) && i.intersection(j) && !i.containsChild(j)){
-					i.addChild(j);
-					j.addChild(i);
-				}
+	}
+	
+	for(Node i : nodes){
+		for(Node j : nodes){
+			if(!i.equals(j) && i.intersection(j) && !i.containsChild(j)){
+				i.addChild(j);
+				j.addChild(i);
 			}
 		}
-		
-		
-		
-		this.sortNodes();
-		
-		for(Node i : nodes){
-			System.out.print("("+i.getInf()+","+i.getSup()+") : ");
-			for(Node j : i.getChildren()){
-				System.out.print("("+j.getInf()+","+j.getSup()+") ");
-			}
-			System.out.println();
+	}
+	
+	
+	
+	this.sortNodes();
+	
+	for(Node i : nodes){
+		System.out.print("("+i.getInf()+","+i.getSup()+") : ");
+		for(Node j : i.getChildren()){
+			System.out.print("("+j.getInf()+","+j.getSup()+") ");
 		}
-		
-		this.scc.addAll(getStronglyConnectedComponents(nodes));
-		ArrayList<StronglyConnectedComponent> temp = new ArrayList<StronglyConnectedComponent>();
-		for(int i = 0; i < this.scc.size(); i++){
-			System.out.print("-> ");
-			for(Node n : this.scc.get(i).getNodes()){
-				System.out.print("("+n.getInf()+","+n.getSup()+") ");
-			}
-			if(sccIsCyclic(this.scc.get(i))){
-				for(Node n : this.scc.get(i).getNodes()){
-					System.out.print("("+n.getInf()+","+n.getSup()+") "+n.getColor());
-				}
-				temp.addAll(getStronglyConnectedComponents(this.scc.get(i).getNodes()));
-				System.out.println(true);
-			}
-			else{
-				temp.add(this.scc.get(i));
-				System.out.println(false);
-			}
+		System.out.println();
+	}
+	
+	this.cc.addAll(getStronglyConnectedComponents(nodes));
+	ArrayList<ConnectedComponent> temp = new ArrayList<ConnectedComponent>();
+	for(int i = 0; i < this.cc.size(); i++){
+		System.out.print("-> ");
+		for(Node n : this.cc.get(i).getNodes()){
+			System.out.print("("+n.getInf()+","+n.getSup()+") ");
 		}
-		this.scc = temp;
-		
-		for(int i = 0; i < this.scc.size(); i++){
-			System.out.print("--> ");
-			for(Node n : temp.get(i).getNodes()){
+		if(this.cc.get(i).hasOddCycle()){
+			for(Node n : this.cc.get(i).getNodes()){
 				System.out.print("("+n.getInf()+","+n.getSup()+") "+n.getColor());
 			}
-			System.out.println();
+			temp.addAll(getStronglyConnectedComponents(this.cc.get(i).getNodes()));
+			System.out.println(true);
 		}
-		
-		for(Node n : exceptions){
-			System.out.print("---> ");
-			System.out.println("("+n.getInf()+","+n.getSup()+") ");
-		}		
-		
-		for(StronglyConnectedComponent s : this.scc){
-			s.sortNodes();
+		else{
+			temp.add(this.cc.get(i));
+			System.out.println(false);
 		}
-		
-		for(Node i : nodes){
-			System.out.print("("+i.getInf()+","+i.getSup()+") : ");
-			for(Node j : i.getChildren()){
-				System.out.print("("+j.getInf()+","+j.getSup()+") "+j.getColor()+" ");
+	}
+	this.cc = temp;
+	
+	for(int i = 0; i < this.cc.size(); i++){
+		System.out.print("--> ");
+		for(Node n : temp.get(i).getNodes()){
+			System.out.print("("+n.getInf()+","+n.getSup()+") "+n.getColor());
+		}
+		System.out.println();
+	}
+	
+	for(Node n : exceptions){
+		System.out.print("---> ");
+		System.out.println("("+n.getInf()+","+n.getSup()+") ");
+	}		
+	
+	for(ConnectedComponent s : this.cc){
+		s.sortNodes();
+	}
+	
+	for(Node i : nodes){
+		System.out.print("("+i.getInf()+","+i.getSup()+") : ");
+		for(Node j : i.getChildren()){
+			System.out.print("("+j.getInf()+","+j.getSup()+") "+j.getColor()+" ");
+		}
+		System.out.println();
+	}
+	
+	this.cc.add(new Root(-1, nb_bases));
+	sortCc(this.cc);
+	
+	Couple<Integer, ArrayList<ConnectedComponent>> couple = new Couple<Integer, ArrayList<ConnectedComponent>>(1, this.cc);
+	ConnectedComponent root = this.cc.get(0);
+	while(couple.first < this.cc.size()){
+		root.getChildren().add(buildTree(couple).second);
+	}		
+	
+	for(ConnectedComponent i : this.cc){
+		if(i.getSpan_inf() != -1){
+			System.out.print("("+i.getSpan_inf()+","+i.getSpan_sup()+") : children :");
+			for(ConnectedComponent j : i.getChildren()){
+				System.out.print("("+j.getSpan_inf()+","+j.getSpan_sup()+") ");
+			}
+			System.out.print(" | nodes : ");
+			for(Node n : i.getNodes()){
+				System.out.print("("+n.getInf()+","+n.getSup()+") ");
 			}
 			System.out.println();
 		}
-		
-		this.scc.add(new Root(-1, nb_bases));
-		sortScc(this.scc);
-		
-		Couple<Integer, ArrayList<StronglyConnectedComponent>> couple = new Couple<Integer, ArrayList<StronglyConnectedComponent>>(1, this.scc);
-		StronglyConnectedComponent root = this.scc.get(0);
-		while(couple.first < this.scc.size()){
-			root.getChildren().add(buildTree(couple).second);
-		}		
-		
-		for(StronglyConnectedComponent i : this.scc){
-			if(i.getSpan_inf() != -1){
-				System.out.print("("+i.getSpan_inf()+","+i.getSpan_sup()+") : father :");
-				if(i.getFather() != null){
-					System.out.print("("+i.getFather().getSpan_inf()+","+i.getFather().getSpan_sup()+")");
-				}
-				System.out.print(" | children : ");
-				for(StronglyConnectedComponent j : i.getChildren()){
-					System.out.print("("+j.getSpan_inf()+","+j.getSpan_sup()+") ");
-				}
-				System.out.print(" | nodes : ");
-				for(Node n : i.getNodes()){
-					System.out.print("("+n.getInf()+","+n.getSup()+") ");
-				}
-				System.out.println();
-			}
-		}
+	}*/
 	}
-
-	public ArrayList<StronglyConnectedComponent> getScc() {
-		return scc;
+	
+	public ArrayList<ConnectedComponent> getCc() {
+		return cc;
 	}
-
-	public void setScc(ArrayList<StronglyConnectedComponent> scc) {
-		this.scc = scc;
+	
+	public void setCc(ArrayList<ConnectedComponent> cc) {
+		this.cc = cc;
 	}
-
+	
 	public ArrayList<Node> getExceptions() {
 		return exceptions;
 	}
-
+	
 	public void setExceptions(ArrayList<Node> exceptions) {
 		this.exceptions = exceptions;
 	}
@@ -153,40 +157,58 @@ public class Graph {
 	public ArrayList<Node> getNodes() {
 		return nodes;
 	}
-
+	
 	public void setNodes(ArrayList<Node> nodes) {
 		this.nodes = nodes;
+	}
+	
+	public void buildRelationshipNodes() {
+		for(Node i : this.nodes){
+			for(Node j : this.nodes){
+				if(!i.equals(j) && i.isNeighbourWith(j) && !i.containsChild(j)){
+					System.out.println("TRUE");
+					i.addChild(j);
+					j.addChild(i);
+				}
+			}
+		}
 	}
 	
 	public void sortNodes() {
 		Collections.sort(this.nodes, new Comparator<Node>() {
 			public int compare(Node n1, Node n2){
 				int ret = 0;
-				if(n1.getInf() < n2.getInf()){
-					ret = -1;
-				}
-				else if(n1.getInf() > n2.getInf()){
+				if(n1.isGreaterThan(n2)) {
 					ret = 1;
 				}
-				else if(n1.getSup() < n2.getSup()){
+				else {
 					ret = -1;
 				}
-				else if(n1.getSup() > n2.getSup()){
-					ret = 1;
-				}
+				/*if(n1.getInf() < n2.getInf()){
+			ret = -1;
+		}
+		else if(n1.getInf() > n2.getInf()){
+			ret = 1;
+		}
+		else if(n1.getSup() < n2.getSup()){
+			ret = -1;
+		}
+		else if(n1.getSup() > n2.getSup()){
+			ret = 1;
+		}*/
 				return ret;
 			}
 		});
 	}
-
-	public ArrayList<StronglyConnectedComponent> getStronglyConnectedComponents(ArrayList<Node> nodes){
-		ArrayList<StronglyConnectedComponent> l = new ArrayList<StronglyConnectedComponent>();
+	
+	/*public ArrayList<ConnectedComponent> getStronglyConnectedComponents(ArrayList<Node> nodes){
+		ArrayList<ConnectedComponent> l = new ArrayList<ConnectedComponent>();
 		for(Node n : nodes){
 			n.setVisited(false);
 		}
 		for(Node n : nodes){
 			if(!n.isVisited()){
-				StronglyConnectedComponent s;
+				ConnectedComponent s;
 				if(n.getChildren().isEmpty()) {
 					s = new BasePair();
 				}
@@ -198,9 +220,36 @@ public class Graph {
 			}
 		}
 		return l;
+	}*/
+	
+	public ArrayList<ConnectedComponent> getStronglyConnectedComponents(ArrayList<Node> nodes){
+		ArrayList<ConnectedComponent> l = new ArrayList<ConnectedComponent>();
+		for(Node n : nodes){
+			n.setVisited(false);
+		}
+		for(Node n : nodes){
+			if(!n.isVisited()){
+				ConnectedComponent s = this.factoryCC.buildCC();
+				visitChildren(n,s);
+				l.add(s);
+			}
+		}
+		return l;
 	}
-
-	private void visitChildren(Node n, StronglyConnectedComponent s) {
+	
+	/*private ConnectedComponent getWellTypedCC(String type) {
+		if(type == "BP") {
+			return new ConnectedComponentBP();
+		}
+		else if(type == "Area") {
+			return null;
+		}
+		else {
+			return null;
+		}
+	}*/
+	
+	private void visitChildren(Node n, ConnectedComponent s) {
 		n.setVisited(true);
 		s.addNode(n);
 		for(Node child : n.getChildren()){
@@ -210,9 +259,7 @@ public class Graph {
 		}
 	}
 	
-	//TODO : Gerer le cas ou le noeud a un pere de couleur 2 et tous les autres a -1
-	//Solution -> Pas de solution optimale, probleme NP-Complet	
-	private boolean sccIsCyclic(StronglyConnectedComponent s) {
+	/*private boolean ccIsCyclic(ConnectedComponent s) {
 		if(s.getNodes().isEmpty()){
 			return false;
 		}
@@ -244,22 +291,30 @@ public class Graph {
 			s.removeNode(n);
 		}
 		return ret;
+	}*/
+	
+	public void removeOddCycles(String type) {
+		ArrayList<ConnectedComponent> temp = new ArrayList<ConnectedComponent>();
+		for(ConnectedComponent cc : this.cc) {
+			if(cc.hasOddCycle()) {
+				this.exceptions.addAll(cc.removeProblematicNodes());
+				temp.addAll(getStronglyConnectedComponents(cc.getNodes()));
+			}
+			else {
+				temp.add(cc);
+			}
+		}
+		this.cc = temp;
 	}
 	
-	public void sortScc(ArrayList<StronglyConnectedComponent> scc){
-		Collections.sort(this.scc, new Comparator<StronglyConnectedComponent>() {
-			public int compare(StronglyConnectedComponent scc1, StronglyConnectedComponent scc2){
+	public void sortCc(ArrayList<ConnectedComponent> cc){
+		Collections.sort(this.cc, new Comparator<ConnectedComponent>() {
+			public int compare(ConnectedComponent cc1, ConnectedComponent cc2){
 				int ret = 0;
-				if(scc1.getSpan_inf() < scc2.getSpan_inf()){
-					ret = -1;
-				}
-				else if(scc1.getSpan_inf() > scc2.getSpan_inf()){
+				if(cc1.isGreaterThan(cc2)){
 					ret = 1;
 				}
-				else if(scc1.getSpan_sup() < scc2.getSpan_sup()){
-					ret = 1;
-				}
-				else if(scc1.getSpan_sup() > scc2.getSpan_sup()){
+				else {
 					ret = -1;
 				}
 				return ret;
@@ -267,8 +322,8 @@ public class Graph {
 		});
 	}
 	
-	private Couple<Integer,StronglyConnectedComponent> buildTree(Couple<Integer, ArrayList<StronglyConnectedComponent>>couple) {
-		StronglyConnectedComponent temp = couple.second.get(couple.first);
+	private Couple<Integer,ConnectedComponent> buildTree(Couple<Integer, ArrayList<ConnectedComponent>>couple) {
+		ConnectedComponent temp = couple.second.get(couple.first);
 		boolean over = false;
 		couple.first++;
 		while(!over){
@@ -282,7 +337,26 @@ public class Graph {
 				over = true;
 			}
 		}
-		Couple<Integer,StronglyConnectedComponent> ret = new Couple<Integer,StronglyConnectedComponent>(couple.first, temp);
+		Couple<Integer,ConnectedComponent> ret = new Couple<Integer,ConnectedComponent>(couple.first, temp);
 		return ret;
+	}
+	
+	public void calculateConnectedComponent(String type) {
+		ArrayList<ConnectedComponent> l = getStronglyConnectedComponents(this.nodes);
+		this.cc = l;
+	}
+	
+	public void buildCCTree() {
+		sortCc(this.cc);
+		/*for(ConnectedComponent cc : this.getCc()) {
+			ConnectedComponentBP ccbp = (ConnectedComponentBP) cc;
+			System.out.println("CC "+ccbp.getSpan_inf());
+		}*/
+		Couple<Integer, ArrayList<ConnectedComponent>> couple = new Couple<Integer, ArrayList<ConnectedComponent>>(1, this.cc);
+		ConnectedComponent root = this.cc.get(0);
+		while(couple.first < this.cc.size()){
+			root.getChildren().add(buildTree(couple).second);
+		}		
+		
 	}
 }

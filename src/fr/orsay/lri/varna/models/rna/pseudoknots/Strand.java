@@ -27,7 +27,7 @@ public class Strand {
 		this.elements = elements;
 	}
 	
-	public void sortNodes(){
+	public void sortBPCREs(){
 		Collections.sort(this.elements, new Comparator<Element>(){
 			public int compare(Element n1, Element n2){if(n1.getBoundOnStrand(strand_num) < n2.getBoundOnStrand(strand_num)){
 					if(strand_num%2 == 0){
@@ -56,18 +56,18 @@ public class Strand {
 		}
 	}
 	
-	public void buildRelationBetweenNodeInStrand(){
+	public void buildRelationBetweenBPCREInStrand(){
 		for(int i = 0; i < this.elements.size()-1; i++){
 			this.elements.get(i).getDraw_children().add(this.elements.get(i+1));
 			this.elements.get(i+1).getDraw_fathers().add(this.elements.get(i));
 		}
 	}
 	
-	public double getMaxHeightScc(){
+	public double getMaxHeightRe(){
 		double max = 0;
 		for(Element n : this.elements){
-			if(n instanceof StronglyConnectedComponent){
-				Rectangle2D rectangle = ((StronglyConnectedComponent) n).getBounding_box().getBounds2D();
+			if(n instanceof RecursiveElement){
+				Rectangle2D rectangle = ((RecursiveElement) n).getBounding_box().getBounds2D();
 				max = Math.max(rectangle.getHeight(), max);
 			}
 		}

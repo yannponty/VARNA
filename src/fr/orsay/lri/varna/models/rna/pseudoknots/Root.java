@@ -6,21 +6,32 @@ import java.util.ArrayList;
 
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 
-public class Root extends StronglyConnectedComponent{
+public class Root extends RecursiveElement{
 	private Strand strand;
 	private Configuration configuration;
 	
-	public Root(int inf, int sup){
+	public Root(int span_inf, int span_sup){
 		super();
-		this.span_inf = inf;
-		this.span_sup = sup;
-		this.children = new ArrayList<StronglyConnectedComponent>();
-		this.father = null;
+		this.span_inf = span_inf;
+		this.span_sup = span_sup;
+		this.children = new ArrayList<RecursiveElement>();
 		this.bounding_box = new GeneralPath();
 		this.points = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.centers = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.element = new ArrayList<Element>();
-	}	
+	}
+	
+	public Root(int span_inf, int span_sup, ArrayList<BPConstitutingRE> bpcres) {
+		super();
+		this.bpcre = new ArrayList<BPConstitutingRE>(bpcres);
+		this.span_inf = span_inf;
+		this.span_sup = span_sup;
+		this.children = new ArrayList<RecursiveElement>();
+		this.bounding_box = new GeneralPath();
+		this.points = new ArrayList<Couple<Integer,Point2D.Double>>();
+		this.centers = new ArrayList<Couple<Integer,Point2D.Double>>();
+		this.element = new ArrayList<Element>();		
+	}
 
 	/*public void assignCoords(){
 		this.initializeListPoints();
@@ -38,7 +49,7 @@ public class Root extends StronglyConnectedComponent{
 		this.positionChildrenAroundStrand();
 		this.buildBoundingBox();
 	}*/
-	
+
 	public void assignCoords(){
 		this.initializeListPoints();
 		this.initializeListCenters();
@@ -62,22 +73,22 @@ public class Root extends StronglyConnectedComponent{
 	private void buildRootStrand(){
 		Strand s = new Strand(0);
 		for(int i = 0; i < this.span_sup; i++){
-			StronglyConnectedComponent scc = this.getCorrespondingScc(i);
-			if(scc == null){
-				Node n = new Node(i,i,1,1);
+			RecursiveElement re = this.getCorrespondingRe(i);
+			if(re == null){
+				BPConstitutingRE n = new BPConstitutingRE(i,i,1,1);
 				s.getElements().add(n);
 				this.element.add(n);
 			}
 			else {
-				s.getElements().add(scc);
-				i = scc.span_sup;
-				this.element.add(scc);
-				scc.setStrand(1);
-				//scc.initializeDistances();
+				s.getElements().add(re);
+				i = re.span_sup;
+				this.element.add(re);
+				re.setStrand(1);
+				//re.initializeDistances();
 			}
 		}
-		s.sortNodes();
-		s.buildRelationBetweenNodeInStrand();
+		s.sortBPCREs();
+		s.buildRelationBetweenBPCREInStrand();
 		this.strand = s;
 	}
 	
@@ -86,18 +97,18 @@ public class Root extends StronglyConnectedComponent{
 		ArrayList<Element> queue = new ArrayList<Element>();
 		for(Element n : this.element){
 			if(n.getDraw_fathers().isEmpty()){
-				if(n instanceof Node){
+				if(n instanceof BPConstitutingRE){
 					n.setDraw_infY(0.0);
 					n.setDraw_supY(0.0);					
 				}
 				else {
-					if(((StronglyConnectedComponent) n).getStrand()%2 == 0){
-						n.setDraw_infY(((StronglyConnectedComponent) n).getDistanceBetweenExtrema());
+					if(((RecursiveElement) n).getStrand()%2 == 0){
+						n.setDraw_infY(((RecursiveElement) n).getDistanceBetweenExtrema());
 						n.setDraw_supY(0.0);
 					}
 					else {
 						n.setDraw_infY(0.0);
-						n.setDraw_supY(((StronglyConnectedComponent) n).getDistanceBetweenExtrema());						
+						n.setDraw_supY(((RecursiveElement) n).getDistanceBetweenExtrema());						
 					}
 				}
 				for(Element children : n.getDraw_children()){
@@ -109,9 +120,9 @@ public class Root extends StronglyConnectedComponent{
 			}
 		}
 		
-		ArrayList<Double> maxHeightsLastSccs = new ArrayList<Double>();
+		ArrayList<Double> maxHeightsLastRes = new ArrayList<Double>();
 		for(Strand s : this.strands){
-			maxHeightsLastSccs.add(-1.0);
+			maxHeightsLastRes.add(-1.0);
 		}
 		
 		while(!queue.isEmpty()){
@@ -121,38 +132,38 @@ public class Root extends StronglyConnectedComponent{
 			}
 			else{
 				double max = 0;
-				if(n instanceof Node){
+				if(n instanceof BPConstitutingRE){
 					for(Element father : n.getDraw_fathers()){
 						double minimum_height = 0;
-						if(father instanceof Node){
+						if(father instanceof BPConstitutingRE){
 							double y_father;
-							if(((Node) father).getStrand_inf() == ((Node)n).getStrand_inf()){
+							if(((BPConstitutingRE) father).getStrand_inf() == ((BPConstitutingRE)n).getStrand_inf()){
 								y_father = father.getDraw_inf().getY();
 								minimum_height = y_father + Element.SPACE_BETWEEN_BASES;
-								((Node) n).updateDistanceAbove(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAbove(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_infY(minimum_height);
 							}
-							else if(((Node) father).getStrand_sup() == ((Node)n).getStrand_inf()){
+							else if(((BPConstitutingRE) father).getStrand_sup() == ((BPConstitutingRE)n).getStrand_inf()){
 								y_father = father.getDraw_sup().getY();
 								minimum_height = y_father + Element.SPACE_BETWEEN_BASES;
-								((Node) n).updateDistanceAbove(Math.abs(father.getDraw_sup().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAbove(Math.abs(father.getDraw_sup().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_infY(minimum_height);
 							}
-							else if(((Node) father).getStrand_inf() == ((Node)n).getStrand_sup()){
+							else if(((BPConstitutingRE) father).getStrand_inf() == ((BPConstitutingRE)n).getStrand_sup()){
 								y_father = father.getDraw_inf().getY();
 								minimum_height = y_father + Element.SPACE_BETWEEN_BASES;
-								((Node) n).updateDistanceAboveSup(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAboveSup(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_supY(minimum_height);
 							}
 							else {
 								y_father = father.getDraw_sup().getY();
 								minimum_height = y_father + Element.SPACE_BETWEEN_BASES;
-								((Node) n).updateDistanceAboveSup(Math.abs(father.getDraw_sup().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAboveSup(Math.abs(father.getDraw_sup().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_supY(minimum_height);
 							}
 						}
 						else {
-							int f_strand = ((StronglyConnectedComponent) father).getStrand();
+							int f_strand = ((RecursiveElement) father).getStrand();
 							double y_father;
 							if(f_strand%2 == 0){
 								y_father = father.getDraw_inf().getY();
@@ -162,30 +173,30 @@ public class Root extends StronglyConnectedComponent{
 							}
 							minimum_height = y_father + Element.SPACE_BETWEEN_BASES;
 							if(n.getBoundOnStrand(f_strand) == n.getElementInf()){
-								((Node) n).updateDistanceAbove(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAbove(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_infY(minimum_height);
 							}
 							else{
-								((Node) n).updateDistanceAboveSup(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
+								((BPConstitutingRE) n).updateDistanceAboveSup(Math.abs(father.getDraw_inf().getY() + father.getDistance_above()) - minimum_height);
 								n.setDraw_supY(minimum_height);
 							}
 						}
 						max = Math.max(max, minimum_height);
 					}
 					if(max == n.getDraw_inf().getY()){
-						((Node) n).updateDistanceAboveSup(n.getDistance_above() - (max - n.getDraw_sup().getY()));
+						((BPConstitutingRE) n).updateDistanceAboveSup(n.getDistance_above() - (max - n.getDraw_sup().getY()));
 						n.setDraw_supY(max);				
 					}
 					else {
-						((Node) n).updateDistanceAbove(n.getDistance_above() - (max - n.getDraw_inf().getY()));
+						((BPConstitutingRE) n).updateDistanceAbove(n.getDistance_above() - (max - n.getDraw_inf().getY()));
 						n.setDraw_infY(max);
 					}
 				}
 				else {
 					for(Element father : n.getDraw_fathers()){
 						double minimum_height = 0;
-						if(father instanceof Node){
-							int n_strand = ((StronglyConnectedComponent) n).getStrand();
+						if(father instanceof BPConstitutingRE){
+							int n_strand = ((RecursiveElement) n).getStrand();
 							double y_father;
 							if(father.getBoundOnStrand(n_strand) == father.getElementInf()){
 								y_father = father.getDraw_inf().getY();
@@ -193,11 +204,11 @@ public class Root extends StronglyConnectedComponent{
 							}
 							else {
 								y_father = father.getDraw_sup().getY();
-								minimum_height = y_father + ((Node) father).getDistance_above_sup();						
+								minimum_height = y_father + ((BPConstitutingRE) father).getDistance_above_sup();						
 							}
-							if(maxHeightsLastSccs.get(n_strand-1) != -1){
-								double minHeightScc = minimum_height - n.getDistance_beneath();
-								double diff_height = maxHeightsLastSccs.get(n_strand-1) - minHeightScc;
+							if(maxHeightsLastRes.get(n_strand-1) != -1){
+								double minHeightRe = minimum_height - n.getDistance_beneath();
+								double diff_height = maxHeightsLastRes.get(n_strand-1) - minHeightRe;
 								if(diff_height > 0){
 									minimum_height += diff_height + 30;
 								}
@@ -208,16 +219,16 @@ public class Root extends StronglyConnectedComponent{
 						}
 						max = Math.max(max, minimum_height);
 					}
-					int cur_strand_num = ((StronglyConnectedComponent) n).getStrand();
+					int cur_strand_num = ((RecursiveElement) n).getStrand();
 					if(cur_strand_num%2 == 0){
-						n.setDraw_infY(max + ((StronglyConnectedComponent) n).getDistanceBetweenExtrema()); 
+						n.setDraw_infY(max + ((RecursiveElement) n).getDistanceBetweenExtrema()); 
 						n.setDraw_supY(max);
 					}
 					else {
 						n.setDraw_infY(max); 
-						n.setDraw_supY(max + ((StronglyConnectedComponent) n).getDistanceBetweenExtrema());
+						n.setDraw_supY(max + ((RecursiveElement) n).getDistanceBetweenExtrema());
 					}
-					maxHeightsLastSccs.set(cur_strand_num-1, n.getDraw_inf().getY() + n.getDistance_above());
+					maxHeightsLastRes.set(cur_strand_num-1, n.getDraw_inf().getY() + n.getDistance_above());
 				}
 				for(Element children : n.getDraw_children()){
 					if(!queue.contains(children)){
@@ -268,11 +279,11 @@ public class Root extends StronglyConnectedComponent{
 			}
 		}
 		
-		for(StronglyConnectedComponent scc : this.children){
-			for(int i = 1; i <= scc.getPoints().size()-1; i++){
-				int index = scc.span_inf + i;
-				this.points.set(index,scc.getPoints().get(i));
-				this.centers.set(index,scc.getCenters().get(i));
+		for(RecursiveElement re : this.children){
+			for(int i = 1; i <= re.getPoints().size()-1; i++){
+				int index = re.span_inf + i;
+				this.points.set(index,re.getPoints().get(i));
+				this.centers.set(index,re.getCenters().get(i));
 			}
 		}
 		this.sortPoints();
@@ -280,21 +291,21 @@ public class Root extends StronglyConnectedComponent{
 	}
 	
 	private void positionChildrenAroundStrand() {
-		for(StronglyConnectedComponent scc : this.children){
-			Couple<Point2D.Double, Point2D.Double> c = scc.getFirstAndLastPoints();
+		for(RecursiveElement re : this.children){
+			Couple<Point2D.Double, Point2D.Double> c = re.getFirstAndLastPoints();
 			ArrayList<Element> strand_elements = this.strand.getElements();
 			for(int i = 0; i < strand_elements.size(); i++){
-				if(scc.getSpan_inf() == strand_elements.get(i).getElementInf()){	
+				if(re.getSpan_inf() == strand_elements.get(i).getElementInf()){	
 					double x = strand_elements.get(i).getDraw_inf().getX() - c.first.getX();
 					double y = strand_elements.get(i).getDraw_inf().getY() - c.first.getY();
 					Point2D.Double translation_vector = new Point2D.Double(x, y);
-					scc.translate(translation_vector);				
+					re.translate(translation_vector);				
 				}
 			}
-			/*for(int j = 1; j <= scc.getPoints().size()-1; j++){
-				int index = scc.span_inf + j;
-				this.points.set(index,scc.getPoints().get(j));
-				this.centers.set(index,scc.getCenters().get(j));
+			/*for(int j = 1; j <= re.getPoints().size()-1; j++){
+				int index = re.span_inf + j;
+				this.points.set(index,re.getPoints().get(j));
+				this.centers.set(index,re.getCenters().get(j));
 			}*/
 		}
 	}
@@ -308,23 +319,23 @@ public class Root extends StronglyConnectedComponent{
 	
 	private void setDrawXs() {
 		Element e = this.element.get(0);
-		if(e instanceof Node) {
+		if(e instanceof BPConstitutingRE) {
 			e.setDraw_infX(0.);
 			e.setDraw_supX(0.);			
 		}
 		else {
 			e.setDraw_infX(0.);
-			e.setDraw_supX(((StronglyConnectedComponent) e).getDistanceBetweenExtrema());	
+			e.setDraw_supX(((RecursiveElement) e).getDistanceBetweenExtrema());	
 		}		
 		for(int i = 1; i < this.element.size(); i++) {
 			e = this.element.get(i);
 			double x_father = e.getDraw_fathers().get(0).getDraw_sup().getX();
 			e.setDraw_infX(x_father + Element.SPACE_BETWEEN_BASES);
-			if(e instanceof Node){
+			if(e instanceof BPConstitutingRE){
 				e.setDraw_supX(x_father + Element.SPACE_BETWEEN_BASES);
 			}
 			else {
-				e.setDraw_supX(x_father + Element.SPACE_BETWEEN_BASES + ((StronglyConnectedComponent) e).getDistanceBetweenExtrema());
+				e.setDraw_supX(x_father + Element.SPACE_BETWEEN_BASES + ((RecursiveElement) e).getDistanceBetweenExtrema());
 			}
 		}
 	}
@@ -332,8 +343,8 @@ public class Root extends StronglyConnectedComponent{
 	private void findBestConfiguration() {
 		Configuration best_conf = new Configuration();
 		ArrayList<GeneralPath> bounding_boxes = new ArrayList<GeneralPath>();
-		for(StronglyConnectedComponent scc : this.children) {
-			bounding_boxes.add(scc.getBounding_box());
+		for(RecursiveElement re : this.children) {
+			bounding_boxes.add(re.getBounding_box());
 		}
 		int max_configuration = (int) Math.pow(2, this.children.size());
 		for(int i = 0; i <= max_configuration; i++) {

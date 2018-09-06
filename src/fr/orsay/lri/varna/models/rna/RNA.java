@@ -73,7 +73,8 @@ import fr.orsay.lri.varna.models.export.XFIGExport;
 import fr.orsay.lri.varna.models.naView.NAView;
 import fr.orsay.lri.varna.models.rna.ModeleBackboneElement.BackboneType;
 import fr.orsay.lri.varna.models.rna.pseudoknots.Graph;
-import fr.orsay.lri.varna.models.rna.pseudoknots.StronglyConnectedComponent;
+import fr.orsay.lri.varna.models.rna.pseudoknots.PKDrawing;
+import fr.orsay.lri.varna.models.rna.pseudoknots.ConnectedComponent;
 import fr.orsay.lri.varna.models.templates.DrawRNATemplateCurveMethod;
 import fr.orsay.lri.varna.models.templates.DrawRNATemplateMethod;
 import fr.orsay.lri.varna.models.templates.RNATemplate;
@@ -1253,72 +1254,26 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 	public void drawRNAPK(VARNAConfig conf) {
 		_drawn = true;
 		_drawMode = DRAW_MODE_PK;
-		Graph g = new Graph(this.getAllBPs(), _listeBases.size());
+		PKDrawing pkd = new PKDrawing(this.getAllBPs(), _listeBases.size());
+		pkd.calculatePointsAndCenters();
 		
-		/*int radius = (int) ((3 * (_listeBases.size() + 1) * BASE_RADIUS) / (2 * Math.PI));
-		double angle;
-		for (int i = 0; i < _listeBases.size(); i++) {
-			angle = -((((double) -(i + 1)) * 2.0 * Math.PI)
-					/ ((double) (_listeBases.size() + 1)) - Math.PI / 2.0);
-			_listeBases
-					.get(i)
-					.setCoords(
-							new Point2D.Double(
-									-100,
-									100));
-			_listeBases.get(i).setCenter(new Point2D.Double(0, 0));
-		}*/
-		/*for (int i = 2; i < _listeBases.size(); i++) {
-			angle = -((((double) -(i + 1)) * 2.0 * Math.PI)
-					/ ((double) (_listeBases.size() + 1)) - Math.PI / 2.0);
-			_listeBases
-					.get(i)
-					.setCoords(
-							new Point2D.Double(
-									0,
-									0));
-			_listeBases.get(i).setCenter(new Point2D.Double(0, 0));
-		}*/
-		/*for(Node n : g.getNodes()){
-			_listeBases.get(n.getBasePair().getIndex5()).setCoords(n.getDraw_inf());
-			_listeBases.get(n.getBasePair().getIndex3()).setCoords(n.getDraw_sup());
-		}*/
-		int indexScc = 0;
-		drawRNAPKAux(g.getScc().get(indexScc));
-		int i = 2;
-		/*System.out.println("BB "+g.getScc().get(i).getBounding_box().getBounds2D().getX()+" "+g.getScc().get(i).getBounding_box().getBounds2D().getY()+" "+g.getScc().get(i).getBounding_box().getBounds2D().getWidth()+" "+g.getScc().get(i).getBounding_box().getBounds2D().getHeight());
-		_debugShape.add(g.getScc().get(2).getBounding_box());
-		_debugShape.add(g.getScc().get(5).getBounding_box());
-		_debugShape = g.getScc().get(1).debugShape;*/
-		
-		g.getScc().get(indexScc).verticalFlip();
-		/*for(StronglyConnectedComponent scc : g.getScc()){
-			scc.vertical_flip();	
-		}*/
-		for(Couple<Integer,Point2D.Double> c : g.getScc().get(indexScc).getPoints()){	
+		for(Couple<Integer,Point2D.Double> c : pkd.getPoints()){	
 			_listeBases.get(c.first).setCoords(new Point2D.Double(c.second.getX(),c.second.getY()));
 		}
-		System.out.println("CENTRES "+g.getScc().get(indexScc).getCenters());
-		for(Couple<Integer,Point2D.Double> c : g.getScc().get(indexScc).getCenters()){
+		System.out.println("CENTRES "+pkd.getCenters());
+		for(Couple<Integer,Point2D.Double> c : pkd.getCenters()){
 			_listeBases.get(c.first).setCenter(new Point2D.Double(c.second.getX(),c.second.getY()));
 		}
 		
-		System.out.println("DebugInfo: Bases "+_listeBases.size());
+		/*System.out.println("DebugInfo: Bases "+_listeBases.size());
 		System.out.println("DebugInfo: Nodes "+g.getNodes().size());
 		System.out.println("DebugInfo: Cc "+g.getScc().size());
-		System.out.println("DebugInfo: Exceptions "+g.getExceptions().size());
+		System.out.println("DebugInfo: Exceptions "+g.getExceptions().size());*/
 		
 		
 		/*for(ModeleBase m : _listeBases) {
 			System.out.println("CENTRE "+m.getIndex()+" : "+m.getCenter().getX()+" "+m.getCenter().getY());
 		}*/
-	}
-	
-	public void drawRNAPKAux(StronglyConnectedComponent scc){
-		for(StronglyConnectedComponent child : scc.getChildren()){
-			drawRNAPKAux(child);
-		}
-		scc.assignCoords();
 	}
 
 	public void drawRNAVARNAView(VARNAConfig conf) {
