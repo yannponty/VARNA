@@ -10,7 +10,7 @@ import java.util.Comparator;
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 
 public class PseudoKnot extends RecursiveElement{
-	protected ArrayList<Trombone> trombones;
+	protected ArrayList<Hinge> hinges;
 	protected ArrayList<Strand> strands;
 	
 	public PseudoKnot(){
@@ -23,7 +23,7 @@ public class PseudoKnot extends RecursiveElement{
 		this.points = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.centers = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.element = new ArrayList<Element>();
-		this.trombones = new ArrayList<Trombone>();
+		this.hinges = new ArrayList<Hinge>();
 		this.strands = new ArrayList<Strand>();
 	}
 	
@@ -37,7 +37,7 @@ public class PseudoKnot extends RecursiveElement{
 		this.points = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.centers = new ArrayList<Couple<Integer,Point2D.Double>>();
 		this.element = new ArrayList<Element>();
-		this.trombones = new ArrayList<Trombone>();
+		this.hinges = new ArrayList<Hinge>();
 		this.strands = new ArrayList<Strand>();
 	}
 	
@@ -50,7 +50,7 @@ public class PseudoKnot extends RecursiveElement{
 		this.setDrawXs();
 		this.assignPointsAndCentersElementsFromStrands();
 		this.positionChildrenAroundStrands();
-		this.assignPointsAndCentersElementsFromTrombones();
+		this.assignPointsAndCentersElementsFromHinges();
 		//this.positionPseudoKnotCorrectly();
 		this.buildBoundingBox();
 	}
@@ -174,8 +174,8 @@ public class PseudoKnot extends RecursiveElement{
 							Point2D.Double last_point = c.second.getCoordBoundOnStrand(cur_strand);
 							int nb_base = temp_list.size() - last_re_index - 1;
 							boolean even_strand = ((cur_strand-1)%2 == 0);
-							Trombone t = new Trombone(first_point, last_point, nb_base, first_index, even_strand);
-							trombones.add(t);
+							Hinge h = new Hinge(first_point, last_point, nb_base, first_index, even_strand);
+							hinges.add(h);
 						}
 					}
 				}
@@ -631,13 +631,13 @@ public class PseudoKnot extends RecursiveElement{
 		}
 	}
 	
-	private void assignPointsAndCentersElementsFromTrombones() {
-		for(int i = 0; i < this.trombones.size(); i++){
-			this.trombones.get(i).assignPointsAndCentersCoords();
-			int index = this.trombones.get(i).getFirst_index() - this.span_inf + 1;
-			for(int j = 0; j < this.trombones.get(i).getPoints().size(); j++){
-				this.points.set(index+j, this.trombones.get(i).getPoints().get(j));
-				this.centers.set(index+j, this.trombones.get(i).getCenters().get(j));
+	private void assignPointsAndCentersElementsFromHinges() {
+		for(int i = 0; i < this.hinges.size(); i++){
+			this.hinges.get(i).assignPointsAndCentersCoords();
+			int index = this.hinges.get(i).getFirst_index() - this.span_inf + 1;
+			for(int j = 0; j < this.hinges.get(i).getPoints().size(); j++){
+				this.points.set(index+j, this.hinges.get(i).getPoints().get(j));
+				this.centers.set(index+j, this.hinges.get(i).getCenters().get(j));
 			}
 		}
 	}

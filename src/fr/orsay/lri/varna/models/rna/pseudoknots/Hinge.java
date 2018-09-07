@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 
-public class Trombone {
+public class Hinge {
 	private static final double SPACE_BETWEEN_BASES = 50;
 	
 	private Point2D.Double first_point;
@@ -17,7 +17,7 @@ public class Trombone {
 	private ArrayList<Couple<Integer,Point2D.Double>> points;
 	private ArrayList<Couple<Integer,Point2D.Double>> centers;
 
-	public Trombone() {
+	public Hinge() {
 		this.first_point = new Point2D.Double();
 		this.last_point = new Point2D.Double();
 		this.nb_base = 0;
@@ -27,7 +27,7 @@ public class Trombone {
 		this.centers = new ArrayList<Couple<Integer,Point2D.Double>>();		
 	}	
 
-	public Trombone(Double first_point, Double last_point, int nb_base, int first_index, boolean even_strand) {
+	public Hinge(Double first_point, Double last_point, int nb_base, int first_index, boolean even_strand) {
 		this.first_point = first_point;
 		this.last_point = last_point;
 		this.nb_base = nb_base;
@@ -89,7 +89,7 @@ public class Trombone {
 	public void assignPointsAndCentersCoords(){
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
 		double dy_first_last = Math.abs(this.last_point.getY() - this.first_point.getY());
-		double trombone_minimal_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
+		double trombone_minimal_length = (this.nb_base+1)*Hinge.SPACE_BETWEEN_BASES;
 		double delta = (trombone_minimal_length - Math.PI*trombone_radius - dy_first_last)/2.;
 		delta = Math.max(delta, 0);
 		double trombone_length = Math.PI*trombone_radius + 2*delta + dy_first_last;
@@ -110,7 +110,7 @@ public class Trombone {
 	/*public void assignPointsAndCentersCoords(){
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
 		double dy_first_last = Math.abs(this.last_point.getY() - this.first_point.getY());
-		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
+		double trombone_length = (this.nb_base+1)*Hinge.SPACE_BETWEEN_BASES;
 		double delta = 0;
 		double pos = 0;
 		int index = 0;
@@ -126,10 +126,10 @@ public class Trombone {
 			c1 = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
 			pos = (1.0/(this.nb_base+1))*this.nb_base;
 			c2 = this.findPointandCenter(trombone_length, delta, dy_first_last, trombone_radius, pos);
-			//boolean eval1 = c1.first.getX() == this.first_point.getX() && (Math.abs(c1.first.getY() - this.first_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
-			//boolean eval2 = c2.first.getX() == this.last_point.getX() && (Math.abs(c2.first.getY() - this.last_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
-			boolean eval1 = (Math.abs(c1.first.getY() - this.first_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
-		    boolean eval2 = (Math.abs(c2.first.getY() - this.last_point.getY()) >= Trombone.SPACE_BETWEEN_BASES);
+			//boolean eval1 = c1.first.getX() == this.first_point.getX() && (Math.abs(c1.first.getY() - this.first_point.getY()) >= Hinge.SPACE_BETWEEN_BASES);
+			//boolean eval2 = c2.first.getX() == this.last_point.getX() && (Math.abs(c2.first.getY() - this.last_point.getY()) >= Hinge.SPACE_BETWEEN_BASES);
+			boolean eval1 = (Math.abs(c1.first.getY() - this.first_point.getY()) >= Hinge.SPACE_BETWEEN_BASES);
+		    boolean eval2 = (Math.abs(c2.first.getY() - this.last_point.getY()) >= Hinge.SPACE_BETWEEN_BASES);
 			if(eval1 && eval2){
 				index = this.first_index + 1;
 				point = new Couple<Integer,Point2D.Double>(index,c1.first);
@@ -158,7 +158,7 @@ public class Trombone {
 		}
 	}*/
 	/*public void AssignPointsandCentersCoords(){
-		double trombone_length = (this.nb_base+1)*Trombone.SPACE_BETWEEN_BASES;
+		double trombone_length = (this.nb_base+1)*Hinge.SPACE_BETWEEN_BASES;
 		double trombone_radius = (this.last_point.getX()-this.first_point.getX())/2.0;
 		double dy_first_last = 0;
 		if(this.first_point.getY() < this.last_point.getY()){

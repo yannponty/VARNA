@@ -293,7 +293,7 @@ public class Graph {
 		return ret;
 	}*/
 	
-	public void removeOddCycles(String type) {
+	public void removeOddCycles() {
 		ArrayList<ConnectedComponent> temp = new ArrayList<ConnectedComponent>();
 		for(ConnectedComponent cc : this.cc) {
 			if(cc.hasOddCycle()) {
@@ -341,7 +341,7 @@ public class Graph {
 		return ret;
 	}
 	
-	public void calculateConnectedComponent(String type) {
+	public void calculateConnectedComponent() {
 		ArrayList<ConnectedComponent> l = getStronglyConnectedComponents(this.nodes);
 		this.cc = l;
 	}
