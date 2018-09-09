@@ -1,14 +1,16 @@
 package fr.orsay.lri.varna.models.rna.pseudoknots;
 
+import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import fr.orsay.lri.varna.applications.templateEditor.Couple;
 
 public class Root extends RecursiveElement{
 	private Strand strand;
-	private Configuration configuration;
+	private String repartition;
 	
 	public Root(int span_inf, int span_sup){
 		super();
@@ -64,8 +66,8 @@ public class Root extends RecursiveElement{
 			n.setDraw_supY(0.0);
 		}*/
 		this.positionChildrenAroundStrand();
-		this.findBestConfiguration();
-		this.applyBestConfiguration();
+		this.findBestRepartition();
+		this.applyBestRepartition();
 		this.assignPointsAndCentersElementsFromStrand();
 		this.buildBoundingBox();
 	}
@@ -340,7 +342,62 @@ public class Root extends RecursiveElement{
 		}
 	}
 	
-	private void findBestConfiguration() {
+	private void findBestRepartition() {
+		Graph graph = this.buildGraph();
+		graph.calculateConnectedComponents();
+		char repartition[] = new char[this.children.size()];
+		for(ConnectedComponent cc : graph.getCc()) {
+			ConnectedComponentArea cca = (ConnectedComponentArea) cc;
+			if(cc.hasOddCycle()) {
+				cca.sortNodes();
+				cca.retrieveBounding_boxes();
+				Configuration best_conf = this.findBestConfiguration(cca);
+				for(int i = 0; i < best_conf.getRepartition().length(); i++) {
+					int position = ((NodeArea)cca.getNodes().get(i)).getPosition();
+					repartition[position] = best_conf.getRepartition().charAt(i);
+				}
+			}
+			else {
+				for(Node n : cc.getNodes()) {
+					NodeArea na = (NodeArea) n;
+					repartition[na.getPosition()] = Character.forDigit(na.getColor(), 10);
+				}
+			}
+		}
+		this.repartition = new String(repartition);
+	}
+	
+	private Configuration findBestConfiguration(ConnectedComponentArea cca) {
+		Configuration best_conf = new Configuration();
+		int max_configuration = (int) Math.pow(2, cca.getNodes().size());
+		for(int i = 0; i < max_configuration; i++) {
+			ArrayList<GeneralPath> bounding_boxes = new ArrayList<GeneralPath>();
+			for(GeneralPath bb : cca.getBounding_boxes()) {
+				GeneralPath gp = new GeneralPath(bb);
+				bounding_boxes.add(gp);
+			}
+			String i_to_binary = Integer.toBinaryString(i);
+			Configuration conf = new Configuration(bounding_boxes, i_to_binary);
+			conf.positionBoundingBoxes();
+			conf.evalEntropy();
+			System.out.println("ENTROPY "+conf.getRepartition()+" "+conf.getEntropy());
+			if(conf.getEntropy() < best_conf.getEntropy()) {
+				best_conf = conf;
+			}
+		}
+		return best_conf;
+	}
+	
+	private void applyBestRepartition() {
+		System.out.println(repartition);
+		for(int i = 0; i < this.children.size(); i++) {
+			if(this.repartition.charAt(i) == '1') {
+				this.children.get(i).verticalFlip();
+			}
+		}
+	}
+	
+/*	private void findBestConfiguration() {
 		Configuration best_conf = new Configuration();
 		ArrayList<GeneralPath> bounding_boxes = new ArrayList<GeneralPath>();
 		for(RecursiveElement re : this.children) {
@@ -366,5 +423,19 @@ public class Root extends RecursiveElement{
 				this.children.get(i).verticalFlip();
 			}
 		}
+	}*/
+
+	private Graph buildGraph() {
+		ArrayList<Node> nodes = new ArrayList<Node>();
+		for(int i = 0; i < this.children.size(); i++) {
+			RecursiveElement re = this.children.get(i);
+			NodeArea na = new NodeArea(re.getBounding_box(), i);
+			nodes.add(na);
+		}
+		FactoryCCArea fcca = new FactoryCCArea();
+		Graph graph = new Graph(nodes, fcca);
+		graph.buildRelationshipNodes();
+		graph.sortNodes();
+		return graph;
 	}
 }

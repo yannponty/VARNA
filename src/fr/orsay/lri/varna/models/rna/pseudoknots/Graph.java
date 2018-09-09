@@ -341,8 +341,9 @@ public class Graph {
 		return ret;
 	}
 	
-	public void calculateConnectedComponent() {
+	public void calculateConnectedComponents() {
 		ArrayList<ConnectedComponent> l = getStronglyConnectedComponents(this.nodes);
+		this.sortCc(l);
 		this.cc = l;
 	}
 	

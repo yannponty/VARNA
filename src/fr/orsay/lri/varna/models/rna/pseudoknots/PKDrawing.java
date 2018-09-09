@@ -56,7 +56,7 @@ public class PKDrawing {
 
 	public void calculatePointsAndCenters() {
 		Graph graph = this.buildGraph();
-		graph.calculateConnectedComponent();
+		graph.calculateConnectedComponents();
 		graph.removeOddCycles();
 		graph.getCc().add(new ConnectedComponentBP(-1, nb_bases));
 		graph.buildCCTree();

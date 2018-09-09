@@ -38,7 +38,7 @@ public class ConnectedComponentBP extends ConnectedComponent{
 	
 	public void addNode(Node node) {
 		NodeBP nodebp = (NodeBP) node;
-		nodes.add(nodebp);
+		this.nodes.add(nodebp);
 		if(this.span_inf == -1){
 			this.span_inf = nodebp.getInf();
 			this.span_sup = nodebp.getSup();

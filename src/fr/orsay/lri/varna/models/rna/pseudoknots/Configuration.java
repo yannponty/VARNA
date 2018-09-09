@@ -4,6 +4,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -11,6 +12,8 @@ public class Configuration {
 	private double entropy;
 	private String repartition;
 	private ArrayList<GeneralPath> bounding_boxes;
+	
+	DecimalFormat df = new DecimalFormat(".##");
 	
 	public Configuration() {
 		this.entropy = Double.MAX_VALUE;
@@ -43,7 +46,7 @@ public class Configuration {
 	}
 	
 	public void evalEntropy() {
-		double entrop = 0;
+		double entropy = 0;
 		for(int i = 0; i < this.bounding_boxes.size() - 1; i++) {
 			for(int j = i + 1; j < this.bounding_boxes.size(); j++) {
 				Area a1 = new Area(this.bounding_boxes.get(i));
@@ -51,11 +54,9 @@ public class Configuration {
 				a1.intersect(a2);
 				Rectangle2D rect = a1.getBounds2D();
 				double rectArea =  rect.getWidth() * rect.getHeight();
-				entrop += rectArea;
+				entropy += Double.parseDouble(df.format(rectArea).replace(",", "."));
 			}
 		}
-		this.entropy = entrop;
+		this.entropy = entropy;
 	}
-	
-
 }

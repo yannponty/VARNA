@@ -144,5 +144,5 @@ public abstract class ConnectedComponent{
 			this.removeNode(n);
 		}
 		return toDelete;
-	}	
+	}
 }
