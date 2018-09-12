@@ -40,10 +40,12 @@ public class BasePair extends RecursiveElement {
 		this.initializeListPoints();
 		this.initializeListCenters();
 		this.initializeBPConstitutingRE();
-		this.buildLoop();
-		this.positionChildrenAroundLoop();	
+		if(this.span_sup - this.span_inf > 1) {
+			this.buildLoop();
+			this.positionChildrenAroundLoop();
+			this.assignCentersCoords();	
+		}
 		this.buildBoundingBox();
-		this.assignCentersCoords();
 	}
 	
 	private void initializeBPConstitutingRE(){
@@ -51,6 +53,18 @@ public class BasePair extends RecursiveElement {
 		Point2D.Double p_sup = new Point2D.Double(Element.BASE_PAIR_DISTANCE, 0);
 		this.bpcre.get(0).setDraw_inf(p_inf);
 		this.bpcre.get(0).setDraw_sup(p_sup);
+		if(this.span_sup - this.span_inf == 1) {
+			Point2D.Double c_inf = new Point2D.Double(5.0, 0);
+			Point2D.Double c_sup = new Point2D.Double(Element.BASE_PAIR_DISTANCE - 5.0, 0);
+			Couple<Integer,Point2D.Double> c =new Couple<Integer,Point2D.Double>(this.span_inf, p_inf);
+			this.points.set(0, c);
+			c =new Couple<Integer,Point2D.Double>(this.span_inf, c_inf);
+			this.centers.set(0, c);
+			c =new Couple<Integer,Point2D.Double>(this.span_sup, p_sup);
+			this.points.set(1, c);
+			c =new Couple<Integer,Point2D.Double>(this.span_sup, c_sup);
+			this.centers.set(1, c);
+		}
 	}
 	protected void buildLoop() {
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
