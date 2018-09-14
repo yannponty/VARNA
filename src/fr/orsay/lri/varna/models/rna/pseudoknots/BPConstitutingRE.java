@@ -29,8 +29,6 @@ public class BPConstitutingRE extends Element{
 		this.sup = sup;
 		this.strand_inf = strand_inf;
 		this.strand_sup = strand_sup;
-		this.draw_inf = new Point2D.Double();
-		this.draw_sup = new Point2D.Double();
 		this.distance_above = Element.SPACE_BETWEEN_BASES;
 		this.distance_beneath = 0.0;
 		this.distance_above_sup = Element.SPACE_BETWEEN_BASES;
@@ -121,11 +119,11 @@ public class BPConstitutingRE extends Element{
 		else return null;
 	}
 
-	public void setDrawX() {
+	/*public void setDrawX() {
 		double BPdistance = 100.0;
 		this.setDraw_infX((this.strand_inf-1)*BPdistance);
 		this.setDraw_supX((this.strand_sup-1)*BPdistance);
-	}
+	}*/
 
 	public void updateDistanceAbove(double distance) {
 		this.distance_above = Math.max(Element.SPACE_BETWEEN_BASES, distance);

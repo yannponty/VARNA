@@ -2,7 +2,6 @@ package fr.orsay.lri.varna.models.rna.pseudoknots;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,6 +11,8 @@ import fr.orsay.lri.varna.applications.templateEditor.Couple;
 public class PseudoKnot extends RecursiveElement{
 	protected ArrayList<Hinge> hinges;
 	protected ArrayList<Strand> strands;
+	
+	private static boolean RESPECT_BP_DISTANCE = true;
 	
 	public PseudoKnot(){
 		super();
@@ -219,6 +220,57 @@ public class PseudoKnot extends RecursiveElement{
 						n.setDraw_infX(0.0);
 						n.setDraw_supX(0.0);
 					}
+					//visited.add(n);
+				}
+			}
+			else {
+				double minimum_distance = 30;
+				double strand_increment = this.strands.get(i).getMaxHeightRe() + minimum_distance;
+				double minimum_increment = Element.BASE_PAIR_DISTANCE;
+				double x_increment = Math.max(strand_increment, minimum_increment);
+				for(Element n : this.strands.get(i).getElements()){
+					if(!visited.contains(n)){
+						if(n instanceof BPConstitutingRE){
+							if(n.getDraw_inf().getX() == -1.0) {
+								n.setDraw_infX(last_x + x_increment);
+							}
+							else {
+								if(RESPECT_BP_DISTANCE) {
+									n.setDraw_supX(n.getDraw_inf().getX() + Element.BASE_PAIR_DISTANCE);
+								}
+								else {
+									n.setDraw_supX(last_x + x_increment);
+								}
+							}
+						}
+						else {
+							n.setDraw_infX(last_x + x_increment);
+							n.setDraw_supX(last_x + x_increment);
+						}
+						//visited.add(n);
+					}
+				}
+				last_x += x_increment;
+			}
+		}
+		/*for(BPConstitutingRE n : this.bpcre){
+			n.setDraw_supX(n.getDraw_inf().getX() + Element.BASE_PAIR_DISTANCE);
+		}*/
+	}
+	
+	/*protected void setDrawXs(){
+		double last_x = 0;
+		ArrayList<Element> visited = new ArrayList<Element>();
+		for(int i = 0; i < this.strands.size(); i++){
+			if(i == 0){
+				for(Element n : this.strands.get(i).getElements()){
+					if(n instanceof BPConstitutingRE){
+						n.setDraw_infX(0.0);
+					}
+					else {
+						n.setDraw_infX(0.0);
+						n.setDraw_supX(0.0);
+					}
 					visited.add(n);
 				}
 			}
@@ -245,7 +297,7 @@ public class PseudoKnot extends RecursiveElement{
 		for(BPConstitutingRE n : this.bpcre){
 			n.setDraw_supX(n.getDraw_inf().getX() + Element.BASE_PAIR_DISTANCE);
 		}
-	}
+	}*/
 	
 	/*public void setDrawYs(){
 		ArrayList<Element> visited = new ArrayList<Element>();

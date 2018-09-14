@@ -17,8 +17,8 @@ public abstract class Element {
 	public Element(){
 		this.draw_children = new ArrayList<Element>();
 		this.draw_fathers = new ArrayList<Element>();
-		this.draw_inf = new Point2D.Double();
-		this.draw_sup = new Point2D.Double();
+		this.draw_inf = new Point2D.Double(-1, -1);
+		this.draw_sup = new Point2D.Double(-1, -1);
 	}
 	
 	public ArrayList<Element> getDraw_children() {
