@@ -54,9 +54,11 @@ public class SwingGraphics implements VueVARNAGraphics {
 		_g2d.draw(s);
 	}
 
+	//TODO Here is ther wrapper function for drawing arcs. All parameters needs to be casted to integer, even the angles.
+	//That makes a big inaccuracy problems for big radii, where the angles have a big influence
 	public void drawArc(double x, double y, double rx, double ry,
 			double angleStart, double angleEnd) {
-		_g2d.drawArc((int) (x-rx/2.), (int) (y-ry/2.), (int) rx, (int) ry, (int) angleStart, (int) angleEnd);	
+		_g2d.drawArc((int) (x-rx/2.), (int) (y-ry/2.), (int) rx, (int) ry, (int) angleStart, (int) angleEnd);
 	}
 
 	public void drawLine(double x1, double y1, double x2, double y2) {
@@ -130,6 +132,11 @@ public class SwingGraphics implements VueVARNAGraphics {
 		{  _g2d.setStroke(_dashedStroke); }
 		else
 		{ _g2d.setStroke(_plainStroke);	}
+	}
+
+	public void fillArc(double x, double y, double rx, double ry,
+						double angleStart, double angleEnd) {
+		_g2d.fillArc((int) (x-rx/2.), (int) (y-ry/2.), (int) rx, (int) ry,  (int)angleStart, (int) angleEnd);
 	}
 
 }

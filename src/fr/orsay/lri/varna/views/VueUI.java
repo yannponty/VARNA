@@ -77,6 +77,7 @@ import fr.orsay.lri.varna.models.VARNAEdits;
 import fr.orsay.lri.varna.models.annotations.ChemProbAnnotation;
 import fr.orsay.lri.varna.models.annotations.HighlightRegionAnnotation;
 import fr.orsay.lri.varna.models.annotations.TextAnnotation;
+import fr.orsay.lri.varna.models.puzzler.ArcHandler;
 import fr.orsay.lri.varna.models.rna.ModeleBase;
 import fr.orsay.lri.varna.models.rna.ModeleBaseNucleotide;
 import fr.orsay.lri.varna.models.rna.ModeleBasesComparison;
@@ -192,10 +193,31 @@ public class VueUI {
 			_vp.fireLayoutChanged(bck);
 		}
 	}
+	public void UITurtle() {
+		if (_vp.isModifiable()) {
+			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
+			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
+					RNA.DRAW_MODE_TURTLE, _vp));
+			_vp.reset();
+			_vp.drawRNA(_vp.getRNA(), RNA.DRAW_MODE_TURTLE);
+			_vp.repaint();
+			_vp.fireLayoutChanged(bck);
+		}
+	}
+	public void UIPuzzler() {
+		if (_vp.isModifiable()) {
+			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
+			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
+					RNA.DRAW_MODE_PUZZLER, _vp));
+			_vp.reset();
+			_vp.drawRNA(_vp.getRNA(), RNA.DRAW_MODE_PUZZLER);
+			_vp.repaint();
+			_vp.fireLayoutChanged(bck);
+		}
+	}
 
 	public void UIVARNAView() {
 		if (_vp.isModifiable()) {
-			System.out.println("VARNAView");
 			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
 			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
 					RNA.DRAW_MODE_VARNA_VIEW, _vp));
@@ -205,21 +227,6 @@ public class VueUI {
 			_vp.fireLayoutChanged(bck);
 		}
 	}
-	
-
-	public void UIPK() {
-		if (_vp.isModifiable()) {
-			Hashtable<Integer, Point2D.Double> bck = backupAllCoords();
-			_undoableEditSupport.postEdit(new VARNAEdits.RedrawEdit(
-					RNA.DRAW_MODE_VARNA_VIEW, _vp));
-			_vp.reset();
-			_vp.drawRNA(_vp.getRNA(), RNA.DRAW_MODE_PK);
-			_vp.repaint();
-			_vp.fireLayoutChanged(bck);
-		}
-	}
-
-
 
 	public void UIReset() {
 		if (_vp.isModifiable()) {
@@ -1428,7 +1435,7 @@ public class VueUI {
 			int i = ml.x;
 			if (indexTo != -1) {
 				if (i == 0) {
-					if (shouldFlip(index, newPos)) {
+					if (shouldFlip(index, newPos) && _vp.getRNA().get_drawMode() != RNA.DRAW_MODE_PUZZLER) {	//No flipping in puzzler
 						UIFlipHelix(h);
 						_undoableEditSupport
 								.postEdit(new VARNAEdits.HelixFlipEdit(h, _vp));
@@ -1507,6 +1514,10 @@ public class VueUI {
 			} else {
 				i++;
 			}
+		}
+		if(_vp.getRNA().get_drawMode() == RNA.DRAW_MODE_PUZZLER){
+			_vp.getRNA().puzzlerHelixRotation(index,newPos,h,new Point(prevIndex,nextIndex));
+			return;
 		}
 		Point2D.Double oldPos = _vp.getRNA().getCoords(index);
 		Point2D.Double limitLoopLeft, limitLoopRight, limitLeft, limitRight, helixStart, helixStop;
@@ -1597,4 +1608,5 @@ public class VueUI {
 		}
 		return angle;
 	}
+
 }

@@ -558,14 +558,16 @@ public class ControleurMenu implements InterfaceVARNAListener,
 			_vp.getVARNAUI().UINAView();
 		} else if (_type.equals("varnaview")) {
 			_vp.getVARNAUI().UIVARNAView();
-		} else if (_type.equals("pkview")) {
-			_vp.getVARNAUI().UIPK();
 		} else if (_type.equals("motifview")) {
 			_vp.getVARNAUI().UIMOTIFView();
 		} else if (_type.equals("line")) {
 			_vp.getVARNAUI().UILine();
 		} else if (_type.equals("flat")) {
 			_vp.getVARNAUI().UIToggleFlatExteriorLoop();
+		} else if (_type.equals("turtle")){
+			_vp.getVARNAUI().UITurtle();
+		} else if (_type.equals("puzzler")){
+			_vp.getVARNAUI().UIPuzzler();
 		} else
 			return false;
 		return true;

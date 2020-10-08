@@ -141,7 +141,7 @@ public class VARNAConfigLoader {
 	public static String modifiableOpt = "modifiable";
 
 	public static String periodNumOpt = "periodNum";
-	
+
 	public static String rotationOpt = "rotation";
 
 	public static String secondSequenceForComparisonOpt = "secondSequence";
@@ -857,7 +857,6 @@ public class VARNAConfigLoader {
 	public static final String ALGORITHM_RADIATE = "radiate";
 	public static final String ALGORITHM_VARNA_VIEW = "varnaview";
 	public static final String ALGORITHM_MOTIF_VIEW = "motifview";
-	public static final String ALGORITHM_PK_VIEW = "pkview";
 
 	private void applyValues(String n) throws ExceptionParameterError,
 			ExceptionNonEqualLength, IOException, ExceptionFileFormatOrSyntax,
@@ -874,8 +873,6 @@ public class VARNAConfigLoader {
 			algoCode = RNA.DRAW_MODE_RADIATE;
 		else if (_algo.equals(ALGORITHM_VARNA_VIEW))
 			algoCode = RNA.DRAW_MODE_VARNA_VIEW;
-		else if (_algo.equals(ALGORITHM_PK_VIEW))
-			algoCode = RNA.DRAW_MODE_PK;
 		else if (_algo.equals(ALGORITHM_MOTIF_VIEW))
 			algoCode = RNA.DRAW_MODE_MOTIFVIEW;
 		else

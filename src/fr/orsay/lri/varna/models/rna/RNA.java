@@ -46,6 +46,9 @@ import java.util.Vector;
 
 import javax.xml.transform.sax.TransformerHandler;
 
+import fr.orsay.lri.varna.models.puzzler.ArcHandler;
+import fr.orsay.lri.varna.models.puzzler.HelixRotation;
+import fr.orsay.lri.varna.models.puzzler.Puzzler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -72,9 +75,6 @@ import fr.orsay.lri.varna.models.export.TikzExport;
 import fr.orsay.lri.varna.models.export.XFIGExport;
 import fr.orsay.lri.varna.models.naView.NAView;
 import fr.orsay.lri.varna.models.rna.ModeleBackboneElement.BackboneType;
-import fr.orsay.lri.varna.models.rna.pseudoknots.Graph;
-import fr.orsay.lri.varna.models.rna.pseudoknots.PKDrawing;
-import fr.orsay.lri.varna.models.rna.pseudoknots.ConnectedComponent;
 import fr.orsay.lri.varna.models.templates.DrawRNATemplateCurveMethod;
 import fr.orsay.lri.varna.models.templates.DrawRNATemplateMethod;
 import fr.orsay.lri.varna.models.templates.RNATemplate;
@@ -82,7 +82,9 @@ import fr.orsay.lri.varna.models.templates.RNATemplateDrawingAlgorithmException;
 import fr.orsay.lri.varna.models.templates.RNATemplateMapping;
 import fr.orsay.lri.varna.utils.RNAMLParser;
 import fr.orsay.lri.varna.utils.XMLUtils;
-import fr.orsay.lri.varna.views.VueUI;
+import rnaDrawing.rnaPuzzler.data.Drawing;
+import rnaDrawing.rnaPuzzler.data.LoopTemplate;
+import rnaDrawing.rnaPuzzler.rnaPuzzler.RNApuzzlerException;
 
 /**
  * The RNA model which contain the base list and the draw algorithm mode
@@ -131,11 +133,10 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 	public static final int DRAW_MODE_MOTIFVIEW = 6;
 
 	public static final int DRAW_MODE_TEMPLATE = 7;
+	public static final int DRAW_MODE_TURTLE = 8;
+	public static final int DRAW_MODE_PUZZLER = 9;
 
-	public static final int DRAW_MODE_PK = 8;
-	
-	
-	public static final int DEFAULT_DRAW_MODE = DRAW_MODE_RADIATE;
+	public static final int DEFAULT_DRAW_MODE = DRAW_MODE_PUZZLER;
 
 	public int BASE_RADIUS = 10;
 	public static final double LOOP_DISTANCE = 40.0; // distance between base
@@ -164,12 +165,12 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 		NormalBases.add("t");
 	}
 
-	public ArrayList<GeneralPath> _debugShape = new ArrayList<GeneralPath>();
+	public GeneralPath _debugShape = null;
 
 	/**
 	 * The draw algorithm mode
 	 */
-	private int _drawMode = DRAW_MODE_RADIATE;
+	private int _drawMode = DRAW_MODE_PUZZLER;
 	private boolean _drawn = false;
 	private String _name = "";
 	private String _id = "";
@@ -178,6 +179,9 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 	 * the base list
 	 */
 	private ArrayList<ModeleBase> _listeBases;
+
+	private ArcHandler puzzlerHandler;
+	private Puzzler puzzler;
 	/**
 	 * the strand list
 	 */
@@ -1251,35 +1255,9 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 		}
 	}
 
-	public void drawRNAPK(VARNAConfig conf) {
-		_drawn = true;
-		_drawMode = DRAW_MODE_PK;
-		PKDrawing pkd = new PKDrawing(this.getAllBPs(), _listeBases.size());
-		pkd.calculatePointsAndCenters();
-		
-		for(Couple<Integer,Point2D.Double> c : pkd.getPoints()){	
-			_listeBases.get(c.first).setCoords(new Point2D.Double(c.second.getX(),c.second.getY()));
-		}
-		System.out.println("CENTRES "+pkd.getCenters());
-		for(Couple<Integer,Point2D.Double> c : pkd.getCenters()){
-			_listeBases.get(c.first).setCenter(new Point2D.Double(c.second.getX(),c.second.getY()));
-		}
-		
-		/*System.out.println("DebugInfo: Bases "+_listeBases.size());
-		System.out.println("DebugInfo: Nodes "+g.getNodes().size());
-		System.out.println("DebugInfo: Cc "+g.getScc().size());
-		System.out.println("DebugInfo: Exceptions "+g.getExceptions().size());*/
-		
-		
-		/*for(ModeleBase m : _listeBases) {
-			System.out.println("CENTRE "+m.getIndex()+" : "+m.getCenter().getX()+" "+m.getCenter().getY());
-		}*/
-	}
-
 	public void drawRNAVARNAView(VARNAConfig conf) {
 		_drawn = true;
 		_drawMode = DRAW_MODE_VARNA_VIEW;
-		System.out.println("[A]");
 		VARNASecDraw vs = new VARNASecDraw();
 		vs.drawRNA(1, this);
 	}
@@ -1392,9 +1370,13 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 		case RNA.DRAW_MODE_VARNA_VIEW:
 			drawRNAVARNAView(conf);
 			break;
-		case RNA.DRAW_MODE_PK:
-			drawRNAPK(conf);
-			break;
+     	case RNA.DRAW_MODE_TURTLE:
+     		drawRNATurtle(conf);
+     		break;
+     	case RNA.DRAW_MODE_PUZZLER:
+     		drawRNAPuzzler(conf);
+     		break;
+
 		default:
 			break;
 		}
@@ -1453,6 +1435,10 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			Point2D.Double center,
 			Vector<Integer> bases)
 	{
+		if(_drawMode == DRAW_MODE_PUZZLER){
+			return;
+		}
+
 			double mydist = Math.abs(radius*(angle / (bases.size() + 1)));
 			double addedRadius= 0.;
 			Point2D.Double PA = new Point2D.Double(center.x + radius * Math.cos(base + pHel),
@@ -1501,6 +1487,39 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			p = (Math.PI*(a+b)*(1+h/4.+h*h/64.+h*h*h/256.+25.*h*h*h*h/16384.))/2.0;
 		}
 		return a;
+	}
+
+	public void reflectDrawing(){
+		Point2D.Double center = calculateCenter();
+		double x;
+		for(ModeleBase base: _listeBases){
+			Point2D.Double temp = base.getCoords();
+			x = temp.x - center.x;
+			x *=-1;
+			x += center.x;
+			base.setCoords(new Point2D.Double(x,temp.y));
+		}
+	}
+
+	private Point2D.Double calculateCenter(){
+		double xmin,xmax,ymin,ymax;
+		Point2D.Double placeholder = _listeBases.get(0).getCoords();
+		xmin = placeholder.x;
+		xmax = placeholder.y;
+		ymin=placeholder.y;
+		ymax=placeholder.y;
+		for(ModeleBase base: _listeBases){
+			Point2D.Double temp = base.getCoords();
+			if(xmin > temp.x)
+				xmin = temp.x;
+			if(xmax < temp.x)
+				xmax=temp.x;
+			if(ymin > temp.y)
+				ymin=temp.y;
+			if(ymax< temp.y)
+				ymax = temp.y;
+		}
+		return new Point2D.Double((xmax-xmin)/2.,(ymax-ymin)/2.);
 	}
 	
 	public static double computeAngle(Point2D.Double center, Point2D.Double p) {
@@ -2091,6 +2110,157 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			}
 		}
 	}
+	public void drawRNATurtle(VARNAConfig config){
+		_drawn = true;
+		_drawMode = DRAW_MODE_TURTLE;
+	}
+	public void drawRNAPuzzler(VARNAConfig config){
+		_drawn=true;
+		_drawMode = DRAW_MODE_PUZZLER;
+		int mypair_table[] = new int[_listeBases.size()+1];
+		mypair_table[0] = _listeBases.size();
+		for(int i=0;i<_listeBases.size();i++){
+			mypair_table[i+1] = _listeBases.get(i).getElementStructure()+1;
+		}
+		puzzler = new Puzzler();
+		puzzler.setScaleFactor(2.5*config._spaceBetweenBases);
+		Drawing res = null;
+		try {
+			res = puzzler.test_puzzler_drawing(mypair_table);
+		} catch(RNApuzzlerException e){
+			e.printStackTrace();
+		}
+		double[] myX,myY;
+		myX = res.getX();
+		myY = res.getY();
+
+		for (int i = 0; i < _listeBases.size(); i++) {
+			_listeBases.get(i).setCoords(
+					new Point2D.Double(myX[i],myY[i]));
+		}
+
+		globalRotation(180.);
+		puzzlerHandler = new ArcHandler();
+		puzzlerHandler.handle(mypair_table,myX,myY);
+		reflectDrawing();
+		for (int i = 0; i < _listeBases.size(); i++) {
+			int indicePartner = _listeBases.get(i).getElementStructure();
+			int temp = puzzlerHandler.isBaseInLoop(i);
+			if (temp == -1 && indicePartner != -1) {
+				Point2D.Double base = _listeBases.get(i).getCoords();
+				Point2D.Double partner = _listeBases.get(indicePartner)
+						.getCoords();
+				_listeBases.get(i).setCenter(
+						new Point2D.Double((base.x + partner.x) / 2.0,
+								(base.y + partner.y) / 2.0));
+			} else if(temp != -1) {
+				_listeBases.get(i).setCenter(puzzlerHandler.getLoopCentre(temp));
+			}
+		}
+	}
+
+	public void recalculateArcsPuzzler(Point2D[] newCoords){
+		int[] mypair_table = new int[newCoords.length+1];
+		mypair_table[0] = newCoords.length;
+		for(int i=0;i<newCoords.length;i++){
+			mypair_table[i+1] = _listeBases.get(i).getElementStructure()+1;
+		}
+		puzzlerHandler = new ArcHandler();
+		puzzlerHandler.handle(mypair_table,newCoords);
+	}
+
+	public void puzzlerSolveCollisionsOnRotation(){
+		Point2D.Double[] newCoords = null;
+		reflectDrawing();
+		globalRotation(180.);
+		try {
+			newCoords = puzzler.resolve_new_intersections(_listeBases);
+		} catch (RNApuzzlerException e){
+			System.out.println("Problems resolving new collisions!");
+		}
+		if(newCoords == null)
+			return;
+		for(int i=0;i<_listeBases.size();i++){
+			_listeBases.get(i).setCoords(newCoords[i]);
+		}
+		globalRotation(180.);
+		reflectDrawing();
+	}
+	public void puzzlerHelixRotation(int indexBase, Point2D.Double newpos,Point loopPoints,Point multiloopBases){
+		puzzlerHandler = new ArcHandler();
+		puzzlerHandler.handle(_listeBases);
+		Point2D.Double oldpos = _listeBases.get(indexBase).getCoords();
+		int looppoint = loopPoints.x;
+		int tmp = puzzlerHandler.isBaseInLoop(looppoint);
+		if(tmp == -1){
+			System.err.println("Error with puzzlerHelixRotation: Base index is not a loop member");
+			return;
+		}
+		int sign = 1;
+		if(puzzlerHandler.isLoopFlipped(tmp)) {
+			sign = -1;
+		}
+		Point2D.Double center = puzzlerHandler.getLoopCentre(tmp);
+		double angle = HelixRotation.angleToRotate(center,oldpos,newpos);
+//		double testAngle = HelixRotation.magnetAngle(computeAngle(center,rotatePoint(center,_listeBases.get(loopPoints.x).getCoords(),sign*angle)),Math.toRadians(3.));
+//		System.out.println("Normal angle: "+Math.toDegrees(angle)+" and magneted angle: "+ Math.toDegrees(testAngle));
+//		boolean isValid = HelixRotation.isRotationValid(_listeBases.get(loopPoints.x).getCoords(),
+//				rotatePoint(center,_listeBases.get(loopPoints.x).getCoords(),sign*angle),
+//				_listeBases.get(multiloopBases.x).getCoords(),puzzler.getUnpairedDist());
+//		isValid = isValid && HelixRotation.isRotationValid(_listeBases.get(loopPoints.y).getCoords(),
+//				rotatePoint(center,_listeBases.get(loopPoints.y).getCoords(),sign*angle),
+//				_listeBases.get(multiloopBases.y).getCoords(),puzzler.getUnpairedDist());
+//		if(!isValid){
+//			System.out.println("Rotation is not valid!");
+//			return;
+//		}
+
+//		System.out.println("Angle diff is " + angle);
+//		double test = computeAngle(center,oldpos) - computeAngle(center,newpos);
+//		System.out.println("Test angle dif is " + test);
+		while(angle > 2*Math.PI)
+			angle -= 2*Math.PI;
+		while(angle< -2*Math.PI)
+			angle += 2*Math.PI;
+
+		int index = multiloopBases.x;
+		int index2 = loopPoints.x;
+		int index3 = multiloopBases.y;
+		int index4 = loopPoints.y;
+
+		rotateHelix(center,loopPoints.x,loopPoints.y,-angle);
+
+		puzzler.setPair_table(ArcHandler.createPairTable(_listeBases));
+		puzzler.updateRotationLoop(multiloopBases.x+2,-1*sign*angle,multiloopBases.y,sign*angle,_listeBases);
+//		System.out.println("Multiloops bases: x: "+ (multiloopBases.x+2) + " y: "+ multiloopBases.y);
+		double angleArc1 = puzzler.getArcAngle(multiloopBases.x + 2);
+		double angleArc2 = puzzler.getArcAngle(multiloopBases.y);
+
+		double anglesUnpairedBasesLeft = angleArc1/(index2-index);
+		double anglesUnpairedBasesRight = angleArc2/(index3-index4);
+
+//		System.out.println("Is flipped?: " + puzzlerHandler.isLoopFlipped(tmp));
+//		System.out.println("Total angle x: "+ Math.toDegrees(angleArc1));
+//		System.out.println("Total angle y: "+ Math.toDegrees(angleArc2));
+//		System.out.println("Angle for x: " + Math.toDegrees(anglesUnpairedBasesLeft));
+//		System.out.println("Angle for y: " + Math.toDegrees(anglesUnpairedBasesRight));
+		Point2D.Double refPoint = _listeBases.get(multiloopBases.x).getCoords();
+		for(int i= multiloopBases.x+1;i<loopPoints.x;i++){
+			Point2D.Double newCoord = rotatePoint(center,refPoint,sign*anglesUnpairedBasesLeft);
+			_listeBases.get(i).setCoords(newCoord);
+			refPoint = _listeBases.get(i).getCoords();
+		}
+		refPoint = _listeBases.get(loopPoints.y).getCoords();
+		for(int i=loopPoints.y+1;i< multiloopBases.y;i++){
+			Point2D.Double newCoord = rotatePoint(center,refPoint,sign*anglesUnpairedBasesRight);
+			_listeBases.get(i).setCoords(newCoord);
+			refPoint = _listeBases.get(i).getCoords();
+		}
+//		puzzlerHandler.handle(_listeBases);
+
+
+	}
+
 
 	/*
 	 * public void drawMOTIFView() { _drawn = true; _drawMode =
@@ -3256,7 +3426,6 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 	 * 
 	 * @param i
 	 * @param j
-	 * @param msbp
 	 */
 	private void addBPNow(int i, int j) {
 		if (j < i) {
@@ -4196,4 +4365,5 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 	ArrayList<ModeleBase> getListeBases() {
 		return _listeBases;
 	}
+	public ArcHandler getPuzzlerHandler() { return puzzlerHandler; }
 }

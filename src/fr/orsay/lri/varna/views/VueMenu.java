@@ -302,9 +302,10 @@ public class VueMenu extends JPopupMenu {
 		createMenuItem("Circular","circular","control 2",submenuAlgorithms,true);
 		createMenuItem("Radiate","radiate","control 3",submenuAlgorithms,true);
 		createMenuItem("NAView","naview","control 4",submenuAlgorithms,true);
-		createMenuItem("PKView","pkview","control 5",submenuAlgorithms,true);
-		createMenuItem("VARNAView","varnaview","control 6",submenuAlgorithms,true);
-		//createMenuItem("MOTIFView","motifview","control 7",submenuAlgorithms,true);
+		createMenuItem("Turtle","turtle","control 8",submenuAlgorithms,true);
+		createMenuItem("Puzzler","puzzler","control 9",submenuAlgorithms,true);
+		//createMenuItem("VARNAView","varnaview","control 5",submenuAlgorithms,true);
+		//createMenuItem("MOTIFView","motifview","control 6",submenuAlgorithms,true);
 		submenuRedraw.add(submenuAlgorithms);
 		
 		// Sets the height increment in LINEAR_MODE type of drawing
