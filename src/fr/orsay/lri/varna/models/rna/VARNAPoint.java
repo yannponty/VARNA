@@ -62,6 +62,10 @@ public class VARNAPoint implements Serializable {
     	return y;
     }
     
+    public double distanceTo(VARNAPoint p) {
+    	return Math.sqrt((x-p.x)*(x-p.x) + (y-p.y)*(y-p.y));
+    }
+    
     public Point2D.Double toPoint2D()
     {
     	return new Point2D.Double(x,y);

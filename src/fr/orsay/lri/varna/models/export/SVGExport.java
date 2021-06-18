@@ -58,7 +58,7 @@ public class SVGExport extends SecStrDrawingProducer {
 		return "<line x1=\"" + orig.x + "\" y1=\"" + (_bb.height - orig.y)
 				+ "\" x2=\"" + dest.x + "\" y2=\"" + (_bb.height - dest.y)
 				+ "\" stroke=\"" + getRGBString(_curColor)
-				+ "\" stroke-width=\"" + thickness + "\" />\n";
+				+ "\" stroke-width=\"" + thickness + "\" stroke-linecap=\"round\" />\n";
 	}
 
 	public String drawRectangleS(Point2D.Double orig, Point2D.Double dims,

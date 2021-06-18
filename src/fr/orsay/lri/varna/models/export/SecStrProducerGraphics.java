@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -107,9 +108,14 @@ public class SecStrProducerGraphics implements VueVARNAGraphics{
 	
 	public void saveToDisk(String path) throws ExceptionWritingForbidden
 	{
+		saveToDisk(new File(path));
+	}
+	
+	public void saveToDisk(File f) throws ExceptionWritingForbidden
+	{
 		FileWriter fout;
 		try {
-			fout = new FileWriter(path);
+			fout = new FileWriter(f);
 			fout.write(_ss.export());
 			fout.close();
 		} catch (IOException e) {

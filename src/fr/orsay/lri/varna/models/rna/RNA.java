@@ -3649,16 +3649,6 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 		setColorMapValues(values, cm, false);
 	}
 
-	public void adaptColorMapToValues(ModeleColorMap cm) {
-		double min = Double.MAX_VALUE;
-		double max = Double.MIN_VALUE;
-		for (int i = 0; i < Math.min(_listeBases.size(), _listeBases.size()); i++) {
-			ModeleBase mb = _listeBases.get(i);
-			max = Math.max(max, mb.getValue());
-			min = Math.min(min, mb.getValue());
-		}
-		cm.rescale(min, max);
-	}
 	
 	
 	private ArrayList<Double> loadDotPlot(StreamTokenizer st)
@@ -3789,7 +3779,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 				mb.setValue(values[i]);
 			}
 			if (rescaleColorMap) {
-				adaptColorMapToValues(cm);
+				rescaleColorMap(cm);
 			}
 		}
 	}

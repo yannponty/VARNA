@@ -14,11 +14,13 @@ public class ModeleColorMap implements Cloneable, Serializable{
   /**
 	 * 
 	 */
-	private static final long serialVersionUID = 4055062096061553106L;
-private Vector<Color> _map;
+  private static final long serialVersionUID = 4055062096061553106L;
+  private Vector<Color> _map;
   private Vector<Double> _values;
+  private Vector<Boolean> _absolute;
   
   public static final Color DEFAULT_COLOR = Color.GREEN; 
+  public static final String ABSOLUTE_PREFIX = "$";
   
   public enum NamedColorMapTypes {
 	  RED ("red",ModeleColorMap.redColorMap()),
@@ -56,18 +58,28 @@ private Vector<Color> _map;
   
   public ModeleColorMap()
   {
-    this(new Vector<Color>(),new Vector<Double>());
+    this(new Vector<Color>(),new Vector<Double>(),new Vector<Boolean>());
   }
 
   
   public ModeleColorMap(Vector<Color> map,
-		  Vector<Double> values)
+		  Vector<Double> values,
+		  Vector<Boolean> absolute
+		  )
   {
 	  _map = map;
 	  _values = values;
+	  _absolute = absolute;
   }
   
+
   public void addColor(double val, Color col)
+  {
+	  addColor(val, col, false);
+  }
+  
+
+  public void addColor(double val, Color col, boolean absolute)
   {
 	  int offset = Arrays.binarySearch(_values.toArray(), val) ;
 	  if (offset<0)
@@ -75,6 +87,7 @@ private Vector<Color> _map;
 		  int inspoint = (-offset)-1;
 		  _map.insertElementAt(col, inspoint);		  
 		  _values.insertElementAt(val,inspoint);		  
+		  _absolute.insertElementAt(absolute,inspoint);
 	  }
   }
 
@@ -122,7 +135,12 @@ private Vector<Color> _map;
   {
 	  return (_values.get(i));
   }
-  
+
+  public Boolean isAbsoluteAt(int i)
+  {
+	  return (_absolute.get(i));
+  }
+
   public Color getColorForValue(double val)
   {
 	  Color result; 
@@ -272,9 +290,15 @@ private Vector<Color> _map;
 			  if (data2.length==2)
 			  {
 				  try{
+					  boolean abs = false;
+					  if (data2[0].startsWith(ABSOLUTE_PREFIX))
+					  {
+						  data2[0] = data2[0].substring(ABSOLUTE_PREFIX.length());
+						  abs = true;
+					  }
 					  Double val = Double.parseDouble(data2[0]);
 					  Color col = Color.decode(data2[1]);
-					  cm.addColor(val, col);
+					  cm.addColor(val, col, abs);
 				  }
 				  catch(Exception e)
 				  {  
@@ -299,16 +323,61 @@ private Vector<Color> _map;
 
   public void rescale(double newMin, double newMax)
   {
-	  double minBck = getMinValue();
-	  double maxBck = getMaxValue();
-	  double spanBck = maxBck-minBck;
 	  if (newMax!=newMin)
-	  {
+	  {		  
 	      newMax = Math.max(newMax,newMin+1.0);
+		  int firstAbsLeft = -1;
+		  int firstAbsRight = -1;
 		  for (int i=0;i<_values.size();i++)
 		  {
-			  double valBck = _values.get(i);
-			  _values.set(i, newMin+(newMax-newMin)*(valBck-minBck)/(spanBck));
+			  if (_absolute.get(i))
+			  {
+				  firstAbsRight = i;
+				  if (firstAbsLeft==-1) 
+				  {
+					  firstAbsLeft = i;
+				  }
+			  }
+		  }
+		  
+		  if (firstAbsRight==-1) {
+			  double minBck = getMinValue();
+			  double maxBck = getMaxValue();
+			  double spanBck = maxBck-minBck;
+			  for (int i=0;i<_values.size();i++)
+			  {
+				  double valBck = _values.get(i);
+				  _values.set(i, newMin+(newMax-newMin)*(valBck-minBck)/(spanBck));
+			  }
+		  }
+		  else {
+			  if (firstAbsLeft>0)
+			  {
+				  double minBck = getMinValue();
+				  double maxBck = _values.get(firstAbsLeft);
+				  double spanBck = maxBck-minBck;
+				  double vMin = newMin;
+				  double vMax = maxBck;
+				  for (int i=0;i<firstAbsLeft;i++)
+				  {
+					  double valBck = _values.get(i);
+					  _values.set(i, newMin+(vMax-vMin)*(valBck-minBck)/(spanBck));
+				  }			  
+			  }
+			  if (firstAbsRight<_values.size())
+			  {
+				  double minBck = _values.get(firstAbsRight);
+				  double maxBck = getMaxValue();
+				  double spanBck = maxBck-minBck;
+				  double vMin = minBck;
+				  double vMax = newMax;
+				  newMin = minBck;
+				  for (int i=firstAbsRight;i<_values.size();i++)
+				  {
+					  double valBck = _values.get(i);
+					  _values.set(i, newMin+(vMax-vMin)*(valBck-minBck)/(spanBck));
+				  }			  
+			  }
 		  }
 	  }
   }
@@ -318,6 +387,7 @@ private Vector<Color> _map;
 	  ModeleColorMap cm = new ModeleColorMap(); 
 	  cm._map = (Vector<Color>) _map.clone();
 	  cm._values = (Vector<Double>)_values.clone();
+	  cm._absolute = (Vector<Boolean>)_absolute.clone();
 	  return cm;
   }
   
@@ -340,9 +410,13 @@ private Vector<Color> _map;
 	  Formatter f = new Formatter();
 	  for(int i=0;i<getNumColors();i++)
 	  {
+		  String abs = "";
+		  if (_absolute.get(i))
+			  abs = ABSOLUTE_PREFIX;
 		  if (i!=0)
 			  f.format(",");
-		  f.format("%.2f:#%02X%02X%02X", _values.get(i),_map.get(i).getRed(),_map.get(i).getGreen(),_map.get(i).getBlue());
+		  
+		  f.format(abs+"%.2f:#%02X%02X%02X", _values.get(i),_map.get(i).getRed(),_map.get(i).getGreen(),_map.get(i).getBlue());
 	  }
 	  return f.out().toString();
   }

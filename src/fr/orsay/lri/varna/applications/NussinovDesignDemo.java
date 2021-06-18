@@ -283,7 +283,7 @@ public class NussinovDesignDemo extends JFrame implements InterfaceVARNAListener
 
 		
 		_vpMaster.addVARNABasesListener(this);
-		setTitle("Fête de la science 2015 - Inria AMIB - Design d'ARN");
+		setTitle("Fête de la science - AMIBio - Design d'ARN");
 		
 		setTarget(secstr[0]);
 		

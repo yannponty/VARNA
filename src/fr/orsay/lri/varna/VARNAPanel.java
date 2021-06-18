@@ -1356,6 +1356,24 @@ public class VARNAPanel extends JPanel {
 					g2D.drawArc((dest.x + orig.x) / 2., dest.y - scaleFactor
 							* _RNA.BASE_RADIUS / 2.0, (distance),
 							(distance * coef), 0, 180);
+				} else if (style.isWobbleUG()) {
+					Point2D.Double midtop = new Point2D.Double(
+							(dest.x + orig.x) / 2., dest.y - distance * coef
+									/ 2. - scaleFactor * _RNA.BASE_RADIUS / 2.0);
+					g2D.drawArc(midtop.x, dest.y - scaleFactor
+							* _RNA.BASE_RADIUS / 2.0, (distance),
+							(distance * coef), 0, 180);
+					drawSymbol(g2D, midtop.x, midtop.y, 1., 0., radiusCircle,
+							false, ModeleBP.Edge.WC);
+				} else {
+					Point2D.Double midtop = new Point2D.Double(
+							(dest.x + orig.x) / 2., dest.y - distance * coef
+									/ 2. - scaleFactor * _RNA.BASE_RADIUS / 2.0);
+					g2D.drawArc(midtop.x, dest.y - scaleFactor
+							* _RNA.BASE_RADIUS / 2.0, (distance),
+							(distance * coef), 0, 180);
+					drawSymbol(g2D, midtop.x, midtop.y, 1., 0., radiusCircle,
+							style.isCIS(), style.getEdgePartner5());
 				}
 			} else {
 				ModeleBP.Edge p1 = style.getEdgePartner5();
@@ -1363,8 +1381,9 @@ public class VARNAPanel extends JPanel {
 				Point2D.Double midtop = new Point2D.Double(
 						(dest.x + orig.x) / 2., dest.y - distance * coef / 2.
 								- scaleFactor * _RNA.BASE_RADIUS / 2.0);
-				g2D.drawArc(midtop.x, dest.y - scaleFactor * _RNA.BASE_RADIUS
-						/ 2.0, (distance), (distance * coef), 0, 180);
+				g2D.drawArc((dest.x + orig.x) / 2., dest.y - scaleFactor
+						* _RNA.BASE_RADIUS / 2.0, (distance), (distance * coef), 0,
+						180);
 				drawSymbol(g2D, orig.x,
 							orig.y-radiusCircle*.95, 1., 0., radiusCircle, style.isCIS(), p1);
 				drawSymbol(g2D, dest.x,

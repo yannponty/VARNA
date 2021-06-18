@@ -103,7 +103,7 @@ public class NussinovDemo extends JFrame implements InterfaceVARNAListener,Inter
 	public static Font textFieldsFont = Font.decode("MonoSpaced-BOLD-16");
 	public static Font labelsFont = Font.decode("SansSerif-BOLD-20");
 	public static final int marginTools = 250;
-	public static String APP_TITLE = "Fête de la science 2015 - Inria AMIB - Repliement d'ARN";
+	public static String APP_TITLE = "Fête de la science - AMIBio - Repliement d'ARN";
 	
 
 	public static ModelBaseStyle createStyle(String txt) 
