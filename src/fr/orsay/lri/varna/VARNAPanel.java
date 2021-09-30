@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2012  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Université Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.9.
  VARNA version 3.9 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -1661,7 +1661,7 @@ public class VARNAPanel extends JPanel {
 			g2D.setPlainStroke(); // On doit avoir un trait droit, sans arrondit
 			g2D.setStrokeThickness(_conf._baseThickness * _scaleFactor);
 
-			// On dessine l'étiquette, rectangle aux bords arrondies.
+			// On dessine l'Ã©tiquette, rectangle aux bords arrondies.
 			g2D.setColor(baseInnerColor);
 			g2D.fillRoundRect((p.getX() - 1.5 * newRadius),
 					(p.getY() - newRadius), (3.0 * newRadius),
@@ -1673,12 +1673,12 @@ public class VARNAPanel extends JPanel {
 					(p.getY() - newRadius), (3 * newRadius), (2 * newRadius),
 					10 * _scaleFactor, 10 * _scaleFactor);
 
-			// On le dessine au centre de l'étiquette.
+			// On le dessine au centre de l'Ã©tiquette.
 			g2D.drawLine((p.getX()), (p.getY() + newRadius) - 1, (p.getX()),
 					(p.getY() - newRadius) + 1);
 
 			/* Dessin du nom de la base (A,C,G,U,etc...) */
-			// On créer le texte des étiquettes
+			// On crÃ©er le texte des Ã©tiquettes
 			String label1 = String.valueOf(mbc.getBase1());
 			String label2 = String.valueOf(mbc.getBase2());
 
@@ -2068,7 +2068,7 @@ public class VARNAPanel extends JPanel {
 						int j1 = b1.getElementStructure();
 						int j2 = b2.getElementStructure();
 						if ((j1 == -1) ^ (j2 == -1)) {
-							// alors la position du nombre associé doit etre
+							// alors la position du nombre associÃ© doit etre
 							Point2D.Double a1 = b1.getCoords();
 							Point2D.Double a2 = b2.getCoords();
 							Point2D.Double c1 = b1.getCenter();

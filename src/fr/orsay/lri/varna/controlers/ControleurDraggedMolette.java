@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Université Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -59,7 +59,7 @@ public class ControleurDraggedMolette implements MouseListener,
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		// si le bon boutton a été pressé
+		// si le bon boutton a Ã©tÃ© pressÃ©
 		if (_rightButtonClick) {
 			_apres = e.getPoint();
 			_direction = new Point(_apres.x - _avant.x, _apres.y - _avant.y);
@@ -84,10 +84,10 @@ public class ControleurDraggedMolette implements MouseListener,
 	}
 
 	public void mousePressed(MouseEvent e) {
-		// lors du clic, la position du curseur est enregistrée
+		// lors du clic, la position du curseur est enregistrÃ©e
 		_avant = e.getPoint();
-		// si le boutton molette est pressé ou si le boutton gauche et shift
-		// sont pressés
+		// si le boutton molette est pressÃ© ou si le boutton gauche et shift
+		// sont pressÃ©s
 		if (e.getButton() == MouseEvent.BUTTON2)
 		{
 			_rightButtonClick = true;
@@ -101,8 +101,8 @@ public class ControleurDraggedMolette implements MouseListener,
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		// si le boutton molette est relaché ou si le boutton gauche et shift
-		// sont relachés
+		// si le boutton molette est relachÃ© ou si le boutton gauche et shift
+		// sont relachÃ©s
 		if (e.getButton() == MouseEvent.BUTTON2)
 			_rightButtonClick = false;
 	}

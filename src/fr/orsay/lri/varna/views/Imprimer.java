@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Université Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ public class Imprimer implements Printable {
 		tache.setPrintable(new Imprimer(
 				"Ceci est un teste d'impression en java!"));
 
-		// printDialog affiche la fenetre de sélection de l’imprimante,
+		// printDialog affiche la fenetre de sÃ©lection de lâimprimante,
 		// etc...
 
 		// il retourne true si on clique sur "Ok", false si on clique sur

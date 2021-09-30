@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Universitï¿½ Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -311,7 +311,7 @@ public class VueMenu extends JPopupMenu {
 		_bpHeightIncrement = createMenuItem("BP height increment","bpheightincrement","control H",submenuRedraw);
 		configMenuItem(_itemFlatExteriorLoop, "flat", "control F", submenuRedraw, true);
 
-		// Item pour le r�glage de l'espace entre chaques bases
+		// Item pour le rï¿½glage de l'espace entre chaques bases
 		createMenuItem("Space between bases","spaceBetweenBases","control shift S",submenuRedraw,true);		
 		createMenuItem("Reset","reset","control shift R",submenuRedraw,true);		
 

@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Universitï¿½ Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -150,7 +150,7 @@ public class ControleurMenu implements InterfaceVARNAListener,
 			_vp.getVARNAUI().UIAnnotationEditFromAnnotation(_vp.get_selectedAnnotation());
 
 			// a partir d'une structure(base, loop, helix) dans l'arn
-			// (annotation li� a la structure)
+			// (annotation liï¿½ a la structure)
 		} else if (_type.endsWith("annotationadd")||_type.contains("annotationremove")||_type.contains("annotationedit")) 
 		{
 			try {
