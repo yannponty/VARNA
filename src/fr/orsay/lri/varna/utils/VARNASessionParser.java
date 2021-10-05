@@ -36,6 +36,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.Vector;
 
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -60,6 +61,7 @@ import fr.orsay.lri.varna.models.rna.ModeleBasesComparison;
 import fr.orsay.lri.varna.models.rna.ModelBaseStyle;
 import fr.orsay.lri.varna.models.rna.RNA;
 import fr.orsay.lri.varna.models.rna.VARNAPoint;
+
 
 public class VARNASessionParser extends DefaultHandler {
 
@@ -364,7 +366,7 @@ public class VARNASessionParser extends DefaultHandler {
 				throw new SAXException("Invalid location for tag "+ModeleBaseNucleotide.XML_VAR_CONTENT_NAME);
 			}
 			String val = _buffer.toString();
-			mbn.setContent(val);
+			mbn.setContent(val.trim());
 		}
 		else if (qName.equals(ModeleBasesComparison.XML_VAR_FIRST_CONTENT_NAME)){
 			if (_buffer==null){
