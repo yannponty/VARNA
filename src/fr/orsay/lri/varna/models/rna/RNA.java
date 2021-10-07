@@ -3723,6 +3723,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 
 	public void readValues(Reader r, ModeleColorMap cm) {
 		try {
+            System.out.println("readValues1:" + cm.toString());
 			StreamTokenizer st = new StreamTokenizer(r);
 			st.eolIsSignificant(true);
 			st.wordChars('/', '/');
@@ -3760,7 +3761,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			for (int i = 0; i < Math.min(vals.size(), getSize()); i++) {
 				v[i] = vals.get(i);
 			}
-			setColorMapValues(v, cm, true);
+			setColorMapValues(v, cm, false);
 			if (isDotPlot)
 			{
 				cm.setMinValue(0.0);
