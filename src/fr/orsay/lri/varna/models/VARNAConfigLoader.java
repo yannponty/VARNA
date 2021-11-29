@@ -972,6 +972,7 @@ public class VARNAConfigLoader {
 			_mainSurface.setBPStyle(_bpStyle);
 			_mainSurface.setDrawBackbone(_drawBackbone);
 
+			_mainSurface.setTitle(_title);
 			_mainSurface.setTitleFontColor(_titleColor);
 			_mainSurface.setTitleFontSize(_titleSize);
 
