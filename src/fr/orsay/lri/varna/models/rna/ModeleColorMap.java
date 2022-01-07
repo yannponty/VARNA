@@ -266,11 +266,11 @@ public class ModeleColorMap implements Cloneable, Serializable{
 	  cm.addColor(-10.0,new Color(204,204,204), true);
 	  cm.addColor(-0.31,new Color(153,153,153), true);
 	  cm.addColor(-0.3,new Color(255,255,255), true);
-	  cm.addColor(0.2,new Color(255,255,255), true);
-	  cm.addColor(0.4,new Color(255,255,0), true);
+	  cm.addColor(0.39999,new Color(255,255,255), true);
+	  cm.addColor(0.4,new Color(255,255,71), true);
 	  cm.addColor(0.69,new Color(255,255,71), true);
 	  cm.addColor(0.7,new Color(255,0,0), true);
-	  cm.addColor(5.00,new Color(255,0,51), false);
+	  cm.addColor(10,new Color(255,0,0), false);
 	  return cm;	  
   }
   
