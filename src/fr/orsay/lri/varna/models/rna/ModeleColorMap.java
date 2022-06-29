@@ -30,7 +30,8 @@ public class ModeleColorMap implements Cloneable, Serializable{
 	  ENERGY ("energy",ModeleColorMap.energyColorMap()),
 	  ROCKNROLL ("rocknroll",ModeleColorMap.rockNRollColorMap()),
 	  VIENNA ("vienna",ModeleColorMap.viennaColorMap()),
-	  SHAPE ("reactivity (SHAPE)",ModeleColorMap.shapeColorMap()),
+	  SHAPECE ("reactivity (SHAPE-ce)",ModeleColorMap.shapeCEColorMap()),
+	  SHAPEMAPPER ("reactivity (Shapemapper)",ModeleColorMap.shapemapperColorMap()),
 	  BW ("bw",ModeleColorMap.bwColorMap());
 	  
 	  String _id;
@@ -260,16 +261,30 @@ public class ModeleColorMap implements Cloneable, Serializable{
 	  return cm;	  
   }
 
-  public static ModeleColorMap shapeColorMap()
+  public static ModeleColorMap shapeCEColorMap()
   {
 	  ModeleColorMap cm = new ModeleColorMap();
 	  cm.addColor(-10.0,new Color(204,204,204), true);
-	  cm.addColor(-0.31,new Color(153,153,153), true);
+	  cm.addColor(-0.30001,new Color(153,153,153), true);
 	  cm.addColor(-0.3,new Color(255,255,255), true);
 	  cm.addColor(0.39999,new Color(255,255,255), true);
 	  cm.addColor(0.4,new Color(255,255,71), true);
-	  cm.addColor(0.69,new Color(255,255,71), true);
+	  cm.addColor(0.69999,new Color(255,255,71), true);
 	  cm.addColor(0.7,new Color(255,0,0), true);
+	  cm.addColor(10,new Color(255,0,0), false);
+	  return cm;	  
+  }
+
+  public static ModeleColorMap shapemapperColorMap()
+  {
+	  ModeleColorMap cm = new ModeleColorMap();
+	  cm.addColor(-10.0,new Color(204,204,204), true);
+	  cm.addColor(-0.30001,new Color(153,153,153), true);
+	  cm.addColor(-0.3,new Color(255,255,255), true);
+	  cm.addColor(0.399999,new Color(255,255,255), true);
+	  cm.addColor(0.4,new Color(255,255,71), true);
+	  cm.addColor(0.849999,new Color(255,255,71), true);
+	  cm.addColor(0.85,new Color(255,0,0), true);
 	  cm.addColor(10,new Color(255,0,0), false);
 	  return cm;	  
   }
