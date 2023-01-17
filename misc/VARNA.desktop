@@ -3,6 +3,6 @@ Type=Application
 Encoding=UTF-8
 Name=VARNA
 Comment=
-Exec=java -jar /path/to/varna/VARNA.jar
+Exec=varna
 Icon=
 Terminal=False
