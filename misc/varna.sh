@@ -1,3 +1,3 @@
 #/bin/sh
 
-java -jar ${CONDA_PREFIX}/lib/varna/VARNAcmd.jar $@
+java -jar ${CONDA_PREFIX}/lib/varna/VARNA.jar $@
