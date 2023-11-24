@@ -3800,8 +3800,6 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			max = Math.max(max, value);
 			min = Math.min(min, value);
 		}
-                System.out.println(min);
-                System.out.println(max);
 		cm.rescale(min, max);
 	}
 
