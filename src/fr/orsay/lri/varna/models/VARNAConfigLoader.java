@@ -972,6 +972,7 @@ public class VARNAConfigLoader {
 			_mainSurface.setBPStyle(_bpStyle);
 			_mainSurface.setDrawBackbone(_drawBackbone);
 
+			_mainSurface.setTitle(_title);
 			_mainSurface.setTitleFontColor(_titleColor);
 			_mainSurface.setTitleFontSize(_titleSize);
 
@@ -1143,11 +1144,10 @@ public class VARNAConfigLoader {
 				vp.setColorMapValues(result);
 			}
 			ModeleColorMap cm = vp.getColorMap();
-			if (_colorMapMin != Double.MIN_VALUE) {
-				// System.out.println("[A]"+_colorMapMin);
+			if (_colorMapMin != Double.MIN_VALUE || _colorMapMin != Double.NaN) {
 				cm.setMinValue(_colorMapMin);
 			}
-			if (_colorMapMax != Double.MAX_VALUE) {
+			if (_colorMapMax != Double.MAX_VALUE || _colorMapMax != Double.NaN) {
 				cm.setMaxValue(_colorMapMax);
 			}
 			_drawColorMap = true;

@@ -1,0 +1,28 @@
+{% set name = "VARNA" %}
+{% set version = "0.93.2" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+build:
+  number: 2
+
+source:
+  git_url: https://github.com/Sargueil-CiTCoM/VARNA
+  git_depth: 1
+
+requirements:
+  build:
+    - ant
+    - openjdk >=11
+
+  run:
+    - openjdk >=11
+
+
+about:
+  home: https://github.com/yannponty/VARNA 
+  license: GPL3
+  license_family: GPL3
+  summary: Visualization Application for RNA  

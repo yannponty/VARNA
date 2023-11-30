@@ -190,8 +190,8 @@ public class VARNAGUI extends JFrame implements DropTargetListener, InterfaceVAR
 	    });
 
 	    _rnaList = new BackupHolder(dlm,_sideList);
-		RNA _RNA1 = new RNA("User defined 1");
-		RNA _RNA2 = new RNA("User defined 2");
+		RNA _RNA1 = new RNA("");
+		RNA _RNA2 = new RNA("");
 		try {
 			_vp = new VARNAPanel("0",".");
 			_zoomWindow = new ZoomWindow(_vp);
@@ -228,10 +228,11 @@ public class VARNAGUI extends JFrame implements DropTargetListener, InterfaceVAR
 		_createButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-				RNA nRNA = new RNA(generateDefaultName());
+				String lbl = generateDefaultName();
+				RNA nRNA = new RNA("");
 				nRNA.setRNA(_seq.getText(), _str.getText());
 				nRNA.drawRNARadiate(_vp.getConfig());
-				_rnaList.add(new VARNAConfig(),nRNA,true);
+				_rnaList.add(new VARNAConfig(),nRNA,lbl,true);
 				} catch (ExceptionUnmatchedClosingParentheses e1) {
 					JOptionPane.showMessageDialog(_vp, e1.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
 				} catch (ExceptionFileFormatOrSyntax e1) {
@@ -412,7 +413,7 @@ public class VARNAGUI extends JFrame implements DropTargetListener, InterfaceVAR
 	
 	public static String generateDefaultName()
 	{
-		return "User file #"+_nextID++;
+		return "Custom "+_nextID++;
 	}
 
 	public RNA getRNA() {
