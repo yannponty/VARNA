@@ -220,7 +220,7 @@ public class XFIGExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBasePairEndS(int index) {
+	public String drawBasePairEndS(int i, int j) {
 		return "";
 	}
 
@@ -230,7 +230,7 @@ public class XFIGExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBackboneEndS(int index) {
+	public String drawBackboneEndS(int i, int j) {
 		return "";
 	}
 

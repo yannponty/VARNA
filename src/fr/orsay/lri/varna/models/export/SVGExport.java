@@ -29,10 +29,10 @@ public class SVGExport extends SecStrDrawingProducer {
 	private double _fontsize = 10.0;
 	private Rectangle2D.Double _bb = new Rectangle2D.Double(0, 0, 10, 10);
 	double _thickness = 2.0;
-	
-	
-	public SVGExport()
-	{
+
+	private int _backup_index = -1;
+
+	public SVGExport() {
 		super();
 		super.setScale(0.5);
 	}
@@ -44,49 +44,47 @@ public class SVGExport extends SecStrDrawingProducer {
 		return "rgb(" + rpc + "%, " + gpc + "%, " + bpc + "%)";
 	}
 
-	public String drawCircleS(Point2D.Double base, double radius,
-			double thickness) {
+	public String drawCircleS(Point2D.Double base, double radius, double thickness) {
 		_thickness = thickness;
-		return "<circle cx=\"" + base.x + "\" cy=\"" + (_bb.height - base.y)
-				+ "\" r=\"" + radius + "\" stroke=\"" + getRGBString(_curColor)
-				+ "\" stroke-width=\"" + thickness + "\" fill=\"none\"/>\n";
+		String cmd = "<circle cx=\"" + base.x + "\" cy=\"" + (_bb.height - base.y) + "\" r=\"" + radius + "\" stroke=\""
+				+ getRGBString(_curColor) + "\" stroke-width=\"" + thickness + "\" fill=\"none\"";
+		if (_backup_index > 0) {
+			cmd += " id=\"+ base_outer_" + _backup_index + "\"";
+		}
+		cmd += "/>\n";
+		return cmd;
 	}
 
-	public String drawLineS(Point2D.Double orig, Point2D.Double dest,
-			double thickness) {
+	public String drawLineS(Point2D.Double orig, Point2D.Double dest, double thickness) {
 		_thickness = thickness;
-		return "<line x1=\"" + orig.x + "\" y1=\"" + (_bb.height - orig.y)
-				+ "\" x2=\"" + dest.x + "\" y2=\"" + (_bb.height - dest.y)
-				+ "\" stroke=\"" + getRGBString(_curColor)
-				+ "\" stroke-width=\"" + thickness + "\" stroke-linecap=\"round\" />\n";
+		return "<line x1=\"" + orig.x + "\" y1=\"" + (_bb.height - orig.y) + "\" x2=\"" + dest.x + "\" y2=\""
+				+ (_bb.height - dest.y) + "\" stroke=\"" + getRGBString(_curColor) + "\" stroke-width=\"" + thickness
+				+ "\" stroke-linecap=\"round\" />\n";
 	}
 
-	public String drawRectangleS(Point2D.Double orig, Point2D.Double dims,
-			double thickness) {
+	public String drawRectangleS(Point2D.Double orig, Point2D.Double dims, double thickness) {
 		_thickness = thickness;
-		return "<rect x=\""+ orig.x+"\" y=\""+(_bb.height - orig.y - dims.y)+"\" width=\""+dims.x
-		  +"\" height=\""+dims.y+
-		  "\" fill=\"none\" style=\"stroke-width:"+thickness+";stroke:"+getRGBString(_curColor)+"\"/>";
+		return "<rect x=\"" + orig.x + "\" y=\"" + (_bb.height - orig.y - dims.y) + "\" width=\"" + dims.x
+				+ "\" height=\"" + dims.y + "\" fill=\"none\" style=\"stroke-width:" + thickness + ";stroke:"
+				+ getRGBString(_curColor) + "\"/>";
 	}
 
 	public String drawTextS(Point2D.Double base, String txt) {
-		//System.out.println(txt);
-		return "<text x=\""
-				+ (base.x)
-				+ "\" y=\""
-				+ (_bb.height - base.y + 0.4 * _fontsize)
-				+ "\" text-anchor=\"middle\" font-family=\"Verdana\" font-size=\""
-				+ _fontsize + "\" fill=\"" + getRGBString(_curColor) + "\" >"
-				+ txt + "</text>\n";
+		// System.out.println(txt);
+		return "<text x=\"" + (base.x) + "\" y=\"" + (_bb.height - base.y + 0.4 * _fontsize)
+				+ "\" text-anchor=\"middle\" font-family=\"Verdana\" font-size=\"" + _fontsize + "\" fill=\""
+				+ getRGBString(_curColor) + "\" >" + txt + "</text>\n";
 	}
 
-	public String fillCircleS(Point2D.Double base, double radius,
-			double thickness, Color col) {
+	public String fillCircleS(Point2D.Double base, double radius, double thickness, Color col) {
 		_thickness = thickness;
-
-		return "<circle cx=\"" + base.x + "\" cy=\"" + (_bb.height - base.y)
-				+ "\" r=\"" + radius + "\" stroke=\"none\" stroke-width=\""
-				+ thickness + "\" fill=\"" + getRGBString(col) + "\"/>\n";
+		String cmd = "<circle cx=\"" + base.x + "\" cy=\"" + (_bb.height - base.y) + "\" r=\"" + radius
+				+ "\" stroke=\"none\" stroke-width=\"" + thickness + "\" fill=\"" + getRGBString(col) + "\" ";
+		if (_backup_index > 0) {
+			cmd += " id=\"+ base_inner_" + _backup_index + "\"";
+		}
+		cmd += "/>\n";
+		return cmd;
 	}
 
 	public String footerS() {
@@ -95,12 +93,9 @@ public class SVGExport extends SecStrDrawingProducer {
 
 	public String headerS(Rectangle2D.Double bb) {
 		_bb = bb;
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-				+ "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \n"
-				+ "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
-				+ "\n"
-				+ "<svg width=\"100%\" height=\"100%\" version=\"1.1\"\n"
-				+ "xmlns=\"http://www.w3.org/2000/svg\">\n";
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \n"
+				+ "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n" + "\n"
+				+ "<svg width=\"100%\" height=\"100%\" version=\"1.1\"\n" + "xmlns=\"http://www.w3.org/2000/svg\">\n";
 	}
 
 	public String setFontS(int font, double size) {
@@ -108,27 +103,23 @@ public class SVGExport extends SecStrDrawingProducer {
 		return "";
 	}
 
-	
-	private Point2D.Double polarToCartesian(Point2D.Double center, double radiusX, double radiusY, double angleInDegrees) {
-		  double angleInRadians = (angleInDegrees) * Math.PI / 180.0;
+	private Point2D.Double polarToCartesian(Point2D.Double center, double radiusX, double radiusY,
+			double angleInDegrees) {
+		double angleInRadians = (angleInDegrees) * Math.PI / 180.0;
 
-		  return new Point2D.Double(center.x + (radiusX * Math.cos(angleInRadians)),
-				  _bb.height - (center.y + (radiusY * Math.sin(angleInRadians))));
-		}
+		return new Point2D.Double(center.x + (radiusX * Math.cos(angleInRadians)),
+				_bb.height - (center.y + (radiusY * Math.sin(angleInRadians))));
+	}
 
-	
-	public String drawArcS(Point2D.Double o, double width, double height,
-			double startAngle, double endAngle) {
+	public String drawArcS(Point2D.Double o, double width, double height, double startAngle, double endAngle) {
 		double rx = width / 2.0;
 		double ry = height / 2.0;
-		
-		Point2D.Double ps = polarToCartesian(o,rx,ry,startAngle);
-		Point2D.Double pe = polarToCartesian(o,rx,ry,endAngle);
-		
-		String d = "<path d=\"M " + ps.x + "," +  ps.y + " A " + rx + "," + ry
-				+ " 0 1,1 " +  pe.x + "," + pe.y + "\" style=\"fill:none; stroke:"
-				+ getRGBString(_curColor) + "; stroke-width:" + _thickness
-				+ "\"/>\n";		
+
+		Point2D.Double ps = polarToCartesian(o, rx, ry, startAngle);
+		Point2D.Double pe = polarToCartesian(o, rx, ry, endAngle);
+
+		String d = "<path d=\"M " + ps.x + "," + ps.y + " A " + rx + "," + ry + " 0 1,1 " + pe.x + "," + pe.y
+				+ "\" style=\"fill:none; stroke:" + getRGBString(_curColor) + "; stroke-width:" + _thickness + "\"/>\n";
 		return d;
 	}
 
@@ -136,15 +127,13 @@ public class SVGExport extends SecStrDrawingProducer {
 		String result = "<path d=\"";
 		for (int i = 0; i < points.length; i++) {
 			if (i == 0) {
-				result += "M " + points[i].x + " " + (_bb.height - points[i].y)
-						+ " ";
+				result += "M " + points[i].x + " " + (_bb.height - points[i].y) + " ";
 			} else {
-				result += "L " + points[i].x + " " + (_bb.height - points[i].y)
-						+ " ";
+				result += "L " + points[i].x + " " + (_bb.height - points[i].y) + " ";
 			}
 		}
-		result += "z\" style=\"fill:none; stroke:" + getRGBString(_curColor)
-				+ "; stroke-width:" + thickness + ";\"/>\n";
+		result += "z\" style=\"fill:none; stroke:" + getRGBString(_curColor) + "; stroke-width:" + thickness
+				+ ";\"/>\n";
 		return result;
 	}
 
@@ -153,25 +142,25 @@ public class SVGExport extends SecStrDrawingProducer {
 		String result = "<path d=\"";
 		for (int i = 0; i < points.length; i++) {
 			if (i == 0) {
-				result += "M " + points[i].x + " " + (_bb.height - points[i].y)
-						+ " ";
+				result += "M " + points[i].x + " " + (_bb.height - points[i].y) + " ";
 			} else {
-				result += "L " + points[i].x + " " + (_bb.height - points[i].y)
-						+ " ";
+				result += "L " + points[i].x + " " + (_bb.height - points[i].y) + " ";
 			}
 		}
-		result += "z\" fill=\""+getRGBString(col)+"\" style=\"stroke:none;\"/>\n";
+		result += "z\" fill=\"" + getRGBString(col) + "\" style=\"stroke:none;\"/>\n";
 		return result;
 	}
-	
+
 	@Override
 	public String drawBaseStartS(int index) {
-		return "";
+		_backup_index = index;
+		return "<g id=\"base_group_" + index + "\">\n";
 	}
 
 	@Override
 	public String drawBaseEndS(int index) {
-		return "";
+		_backup_index = -1;
+		return "<title>Base <b>"+ index +"</b></title>\n </g>\n";
 	}
 
 	@Override
@@ -180,7 +169,7 @@ public class SVGExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBasePairEndS(int index) {
+	public String drawBasePairEndS(int i, int j) {
 		return "";
 	}
 
@@ -190,7 +179,7 @@ public class SVGExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBackboneEndS(int index) {
+	public String drawBackboneEndS(int i, int j) {
 		return "";
 	}
 
