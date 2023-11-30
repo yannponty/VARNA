@@ -1,0 +1,32 @@
+<project>
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" destdir="build/classes" debug="true"/>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/VARNA.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="fr.orsay.lri.varna.applications.VARNAGUI"/>
+            </manifest>
+        </jar>
+        <jar destfile="build/jar/VARNAcmd.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="fr.orsay.lri.varna.applications.VARNAcmd"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="build/jar/VARNA.jar" fork="true"/>
+    </target>
+    <target name="runcmd">
+        <java jar="build/jar/VARNA.jar" fork="true"/>
+    </target>
+
+</project>
