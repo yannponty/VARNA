@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 Universit� Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Université Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -206,7 +206,7 @@ public class ControleurClicMovement implements MouseListener,
 			_vp.lockScrolling();
 
 			_currentState = MouseStates.MOVE_ELEMENT;
-				// si on deplace la souris et qu'une base est selectionnée
+				// si on deplace la souris et qu'une base est selectionnÃ©e
 				if (_selectedBase != null) {
 					if (_vp.getRNA().get_drawMode() == RNA.DRAW_MODE_RADIATE) {
 						_vp.highlightSelectedStem(_selectedBase);

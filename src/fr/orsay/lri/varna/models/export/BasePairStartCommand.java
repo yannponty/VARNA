@@ -2,7 +2,7 @@
  VARNA is a tool for the automated drawing, visualization and annotation of the secondary structure of RNA, designed as a companion software for web servers and databases.
  Copyright (C) 2008  Kevin Darty, Alain Denise and Yann Ponty.
  electronic mail : Yann.Ponty@lri.fr
- paper mail : LRI, bat 490 UniversitÃ© Paris-Sud 91405 Orsay Cedex France
+ paper mail : LRI, bat 490 Université Paris-Sud 91405 Orsay Cedex France
 
  This file is part of VARNA version 3.1.
  VARNA version 3.1 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -17,22 +17,30 @@
  */
 package fr.orsay.lri.varna.models.export;
 
-import java.awt.geom.Point2D;
+import java.awt.Color;
 
-public class TextCommand extends GraphicElement {
-	private Point2D.Double _base;
-	private String _txt;
+import fr.orsay.lri.varna.models.rna.ModeleBP;
 
-	public TextCommand(Point2D.Double base, String txt) {
-		_base = base;
-		_txt = txt;
+public class BasePairStartCommand extends GraphicElement {
+	int _index5;
+	int _index3;
+	ModeleBP _bps;
+
+	public BasePairStartCommand(int i, int j, ModeleBP bps) {
+		_index5 = i;
+		_index3 = j;
+		_bps = bps;
 	}
 
-	public Point2D.Double get_base() {
-		return _base;
+	public int getIndex5() {
+		return _index5;
 	}
 
-	public String get_txt() {
-		return _txt;
+	public int getIndex3() {
+		return _index3;
+	}
+
+	public ModeleBP getBP() {
+		return _bps;
 	}
 }

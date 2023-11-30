@@ -41,7 +41,7 @@ import fr.orsay.lri.varna.models.rna.RNA;
 /**
 * An RNA 2d Panel demo applet
 * 
-* @author Yann Ponty & Darty Kévin
+* @author Yann Ponty & Darty KÃ©vin
 * 
 */
 
