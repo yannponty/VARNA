@@ -726,6 +726,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 		if (conf._drawBackbone)
 		{
 			for (int i = 1; i < _listeBases.size(); i++) {
+				
 				Point2D.Double p1 = coords[i - 1];
 				Point2D.Double p2 = coords[i];
 				x0 = p1.x;
@@ -740,6 +741,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 				boolean consecutivePair = (a == i) && (b == i - 1);
 	
 				if (dist > 0) {
+					out.drawBackboneStart(i-1,i);
 					if (bt != BackboneType.DISCONTINUOUS_TYPE) {
 						Color c = _backbone.getColorBefore(i, conf._backboneColor);
 						if (bt == BackboneType.MISSING_PART_TYPE) {
@@ -797,6 +799,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 											* vn.x), (y1 - BASE_RADIUS * vn.y), 1.0);
 						}
 					}
+					out.drawBackboneEnd(i-1,i);
 				}
 			}
 		}
@@ -819,7 +822,8 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 					norm = Math.sqrt(dx * dx + dy * dy);
 					dx /= norm;
 					dy /= norm;
-
+					
+					out.drawBasePairStart(i,j,style);
 					if (_drawMode == DRAW_MODE_CIRCULAR
 							|| _drawMode == DRAW_MODE_RADIATE
 							|| _drawMode == DRAW_MODE_NAVIEW) {
@@ -829,6 +833,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 						drawBasePairArc(out, i, j, new Point2D.Double(x0, y0),
 								new Point2D.Double(x1, y1), style, conf);
 					}
+					out.drawBasePairEnd(i,j);
 				}
 			}
 		}
@@ -841,7 +846,8 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 
 				int a = bp.getPartner5().getIndex();
 				int b = bp.getPartner3().getIndex();
-
+				
+				out.drawBasePairStart(a,b,bp);
 				if (bp.isCanonical() || conf._drawnNonCanonicalBP) {
 					x0 = coords[a].x;
 					y0 = coords[a].y;
@@ -862,6 +868,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 								new Point2D.Double(x1, y1), bp, conf);
 					}
 				}
+				out.drawBasePairEnd(a,b);
 			}
 		}
 
@@ -882,6 +889,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 			}
 
 
+			out.drawBaseStart(i);
 			if (_listeBases.get(i) instanceof ModeleBasesComparison) {
 				ModeleBasesComparison mb = (ModeleBasesComparison) _listeBases
 						.get(i);
@@ -913,6 +921,7 @@ public class RNA extends InterfaceVARNAObservable implements Serializable {
 				out.drawText(x0, y0, _listeBases.get(i).getContent());
 
 			}
+			out.drawBaseEnd(i);
 		}
 
 		// Drawing base numbers

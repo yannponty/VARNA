@@ -83,7 +83,7 @@ public class TikzExport extends SecStrDrawingProducer {
 		_fontsize = 1.2 * size;
 		return "";
 	}
-
+ 
 	public String setColorS(Color col) {
 		super.setColorS(col);
 		return "\\definecolor{currColor}{rgb}{"+(((double)col.getRed())/255.)+","+(((double)col.getGreen())/255.)+","+(((double)col.getBlue())/255.)+"}\n";
@@ -150,7 +150,7 @@ public class TikzExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBasePairEndS(int index) {
+	public String drawBasePairEndS(int i, int j) {
 		return "";
 	}
 
@@ -160,7 +160,7 @@ public class TikzExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBackboneEndS(int index) {
+	public String drawBackboneEndS(int i, int j) {
 		return "";
 	}
 

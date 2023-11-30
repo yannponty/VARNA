@@ -63,7 +63,7 @@ public class ModeleBP implements Serializable, Comparable<ModeleBP> {
 	public static String XML_VAR_SEC_STR_NAME = "secstr";
 
 	public void toXML(TransformerHandler hd, boolean inSecondaryStructure) throws SAXException
-	{
+	{ 
 		AttributesImpl atts = new AttributesImpl();
 		atts.addAttribute("","",XML_VAR_PARTNER5_NAME,"CDATA",""+_partner5.getIndex());
 		atts.addAttribute("","",XML_VAR_PARTNER3_NAME,"CDATA",""+_partner3.getIndex());

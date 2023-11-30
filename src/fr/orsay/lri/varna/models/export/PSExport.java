@@ -317,17 +317,17 @@ public class PSExport extends SecStrDrawingProducer {
 	}
 
 	@Override
-	public String drawBasePairEndS(int index) {
+	public String drawBasePairEndS(int i, int j) {
 		return "";
 	}
-
+ 
 	@Override
 	public String drawBackboneStartS(int i, int j) {
 		return "";
 	}
 
 	@Override
-	public String drawBackboneEndS(int index) {
+	public String drawBackboneEndS(int i, int j) {
 		return "";
 	}
 }

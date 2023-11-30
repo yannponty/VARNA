@@ -72,9 +72,9 @@ public abstract class SecStrDrawingProducer {
 	public abstract String drawBaseStartS(int index);
 	public abstract String drawBaseEndS(int index);
 	public abstract String drawBasePairStartS(int i, int j, ModeleBP bps);
-	public abstract String drawBasePairEndS(int index);
+	public abstract String drawBasePairEndS(int i, int j);
 	public abstract String drawBackboneStartS(int i, int j);
-	public abstract String drawBackboneEndS(int index);
+	public abstract String drawBackboneEndS(int i, int j);
 
 	public abstract String drawLineS(Point2D.Double orig,
 			Point2D.Double dest, double thickness);
@@ -304,6 +304,30 @@ public abstract class SecStrDrawingProducer {
 
 		return new Point2D.Double((x + dx) * factor, (y + dy) * factor);
 	}
+	
+	
+	public void drawBaseStart(int index) {
+		_commands.add(new BaseStartCommand(index));
+	}
+	
+	public void drawBaseEnd(int index) {
+		_commands.add(new BaseEndCommand(index));		
+	}
+	public void drawBasePairStart(int i, int j, ModeleBP bps) {
+		_commands.add(new BasePairStartCommand(i,j,bps));
+	}
+	
+	public void drawBasePairEnd(int index5, int index3) {
+		_commands.add(new BasePairEndCommand(index5,index3));
+	}
+	
+	public void drawBackboneStart(int i, int j) {
+		_commands.add(new BackboneStartCommand(i,j));		
+	}
+	
+	public void drawBackboneEnd(int i, int j) {
+		_commands.add(new BackboneEndCommand(i, j));			
+	}
 
 	public String export() {
 		Rectangle2D.Double oldbb = getBoundingBox();
@@ -385,6 +409,30 @@ public abstract class SecStrDrawingProducer {
 				}
 				String tmp = fillPolygonS(points, c
 						.get_color());
+				buf.append(tmp);
+			} else if (ge instanceof BasePairStartCommand) {
+				BasePairStartCommand c = (BasePairStartCommand) ge;
+				String tmp = drawBasePairStartS(c.getIndex5(),c.getIndex3(),c.getBP());
+				buf.append(tmp);
+			} else if (ge instanceof BasePairEndCommand) {
+				BasePairEndCommand c = (BasePairEndCommand) ge;
+				String tmp = drawBasePairEndS(c.getIndex5(),c.getIndex3());
+				buf.append(tmp);
+			} else if (ge instanceof BaseStartCommand) {
+				BaseStartCommand c = (BaseStartCommand) ge;
+				String tmp = drawBaseStartS(c.getIndex());
+				buf.append(tmp);
+			} else if (ge instanceof BaseEndCommand) {
+				BaseEndCommand c = (BaseEndCommand) ge;
+				String tmp = drawBaseEndS(c.getIndex());
+				buf.append(tmp);
+			} else if (ge instanceof BackboneStartCommand) {
+				BackboneStartCommand c = (BackboneStartCommand) ge;
+				String tmp = drawBackboneStartS(c.getIndex5(),c.getIndex3());
+				buf.append(tmp);
+			} else if (ge instanceof BackboneEndCommand) {
+				BackboneEndCommand c = (BackboneEndCommand) ge;
+				String tmp = drawBackboneEndS(c.getIndex5(),c.getIndex3());
 				buf.append(tmp);
 			}
 		}
