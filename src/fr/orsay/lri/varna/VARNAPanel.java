@@ -4190,7 +4190,7 @@ public class VARNAPanel extends JPanel {
 			VARNASessionParser sessionData = new VARNASessionParser();
 			sp.parse(fis, sessionData);
 			FullBackup res = new FullBackup(sessionData.getVARNAConfig(),
-					sessionData.getRNA(), "test");
+					sessionData.getRNA(), sessionData.getRNA().getName());
 			return res;
 		} catch (ParserConfigurationException e) {
 			throw new ExceptionLoadingFailed("Bad XML parser configuration",
